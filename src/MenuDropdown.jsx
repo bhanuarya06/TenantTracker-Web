@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 
 const MenuDropdown = () => {
   return (
@@ -13,7 +14,7 @@ const MenuDropdown = () => {
             <h1>Owner Log-in</h1>
           </div>
           <div className="p-2 hover:bg-amber-400 font-bold text-md">
-            <h1>Tenant Log-in</h1>
+            <Link to="/login"><h1>Tenant Log-in</h1></Link>
           </div>
         </div>
       </div>

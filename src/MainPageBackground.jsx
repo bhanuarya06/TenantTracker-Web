@@ -9,7 +9,7 @@ const MainPageBackground = () => {
     <div className="relative">
       {showMenu && <MenuDropdown />}
       <div className="">
-        <img alg="bg-image" src="public/bg-image.webp" className="" ></img>
+        <img alg="bg-image" src="/bg-image.webp" className="" ></img>
       </div>
     </div>
   );
