@@ -1,8 +1,8 @@
 import { configureStore } from "@reduxjs/toolkit";
-import MenuDropdownReducer from "../src/MenuDropdown";
+import MenuReducer from "../utils/Slices/MenuSlice";
 
 export const store = configureStore({
   reducer: {
-    menu: MenuDropdownReducer,
+    menu: MenuReducer,
   },
 });
