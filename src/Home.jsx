@@ -5,8 +5,8 @@ import Ammenities from "./Ammenities";
 const Home = () => {
   return (
     <div>
-      <MainPageBackground></MainPageBackground>
-      <Ammenities></Ammenities>
+      <MainPageBackground />
+      <Ammenities />
     </div>
   );
 };
