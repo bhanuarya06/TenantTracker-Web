@@ -5,6 +5,7 @@ const MenuSlice = createSlice({
   initialState: {
     showMenu: false,
     loginUser: "owner",
+    newUser: false
   },
   reducers: {
     toggleMenu: (state) => {
@@ -13,8 +14,11 @@ const MenuSlice = createSlice({
     whoIsUser: (state,action) => {
       state.loginUser = action.payload;
     },
+    addUser:(state)=>{
+      state.newUser = !state.newUser
+    }
   },
 });
 
-export const { toggleMenu, whoIsUser } = MenuSlice.actions;
+export const { toggleMenu, whoIsUser, addUser } = MenuSlice.actions;
 export default MenuSlice.reducer;
