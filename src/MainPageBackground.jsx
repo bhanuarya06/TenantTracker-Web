@@ -1,6 +1,4 @@
 
-import MenuDropdown from "./MenuDropdown";
-
 const MainPageBackground = () => {
   
   return (

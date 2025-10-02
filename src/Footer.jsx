@@ -1,39 +1,46 @@
-
 const Footer = () => {
   return (
-    <div className="w-full px-60 bg-gray-700 text-white">
-      <div className="flex border-b-2">
-        <div className="mx-10 my-4 w-1/4 ">
-          <h1 className="font-bold text-lg my-1">Tenant Tracker</h1>
-          <p className="w-3/4">
-            "We build, renovate and manage great apartments for rent and take
-            pride in caring for our properties and our residents in Building.""
-          </p>
+    <footer className="w-full bg-gray-700 text-white mt-8">
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 border-b border-gray-500 pb-6">
+          <div>
+            <h1 className="font-bold text-lg mb-2">Tenant Tracker</h1>
+            <p className="text-sm opacity-80">
+              We build, renovate and manage great apartments for rent and take pride in caring for our properties and our residents in Building.
+            </p>
+          </div>
+          <div>
+            <h1 className="font-bold text-lg mb-2">RENT</h1>
+            <ul className="space-y-1">
+              <li className="hover:text-amber-400 cursor-pointer">Home</li>
+              <li className="hover:text-amber-400 cursor-pointer">View Apartments</li>
+              <li className="hover:text-amber-400 cursor-pointer">Office Locations</li>
+            </ul>
+          </div>
+          <div>
+            <h1 className="font-bold text-lg mb-2">COMPANY</h1>
+            <ul className="space-y-1">
+              <li className="hover:text-amber-400 cursor-pointer">About Us</li>
+              <li className="hover:text-amber-400 cursor-pointer">Our Regions</li>
+              <li className="hover:text-amber-400 cursor-pointer">Commercial Properties</li>
+              <li className="hover:text-amber-400 cursor-pointer">Tenant Tracker Blog</li>
+            </ul>
+          </div>
+          <div>
+            <h1 className="font-bold text-lg mb-2">RESOURCES</h1>
+            <ul className="space-y-1">
+              <li className="hover:text-amber-400 cursor-pointer">Careers</li>
+              <li className="hover:text-amber-400 cursor-pointer">Our Guarantee</li>
+              <li className="hover:text-amber-400 cursor-pointer">Terms of Use</li>
+              <li className="hover:text-amber-400 cursor-pointer">Privacy Policy</li>
+            </ul>
+          </div>
         </div>
-        <div className="mx-10 my-4  w-1/4">
-          <h1 className="font-bold text-lg my-1">RENT</h1>
-          <div>HOME</div>
-          <div>View Apartments</div>
-          <div>Office Locations</div>
-          <div>HOME</div>
-        </div>
-        <div className="mx-10 my-4  w-1/4">
-          <h1 className="font-bold text-lg my-1">COMPANY</h1>
-          <div>About Us</div>
-          <div>Our Regions</div>
-          <div>Commercial Properties</div>
-          <div>Tenant Tracker Blog</div>
-        </div>
-        <div className="mx-10 my-4  w-1/4">
-          <h1 className="font-bold text-lg my-1">RESOURCES</h1>
-          <div>Careers</div>
-          <div>Our Guarntee</div>
-          <div>Terms of Use</div>
-          <div>Privacy Policy</div>
+        <div className="text-center text-xs opacity-70 pt-4">
+          © 2025 Tenant Tracker, LLC. All Rights Reserved.
         </div>
       </div>
-      <div className=" p-2">© 2025 Tenant Tracker, LLC. All Rights Reserved.</div>
-    </div>
+    </footer>
   );
 };
 

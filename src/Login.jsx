@@ -9,10 +9,10 @@ const Login = () => {
   const navigate = useNavigate();
   const newUser = useSelector((store) => store.menu.newUser);
   const user = useSelector((store) => store.menu.loginUser);
-  const [firstName, setFirstName] = useState("Virat");
-  const [lastName, setLastName] = useState("Kohli");
-  const [email, setEmail] = useState("virat@gmail.com");
-  const [password, setPassword] = useState("Virat@123");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("chandra@gmail.com");
+  const [password, setPassword] = useState("Chandra@123");
   const [dob, setDob] = useState("");
   const [gender, setGender] = useState("");
   const [mobile, setMobile] = useState("");
@@ -63,206 +63,189 @@ const Login = () => {
     navigate("/");
   };
 
-  return newUser === true ? (
-    <div className="flex justify-center h-200">
-      <div className="w-3/7 rounded-2xl text-center m-10 shadow-2xl">
-        <div className="p-2 font-bold text-3xl bg-zinc-800 rounded-t-2xl text-white h-1/8 flex items-center justify-center">
-          {user === "tenant" ? "Tenant Sign Up" : "Owner Sign Up"}
+  // Shared input styles
+  const inputClass =
+    "w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition";
+
+  // Shared label styles
+  const labelClass = "block text-left font-semibold text-gray-700 my-1";
+
+  // Shared form wrapper
+  const formWrapper =
+    "w-full max-w-lg bg-white rounded-2xl shadow-2xl p-4 flex flex-col gap-2";
+
+  // Shared button styles
+  const buttonClass =
+    "w-full py-3 mt-4 font-bold text-white rounded-lg bg-blue-500 hover:bg-blue-600 cursor-pointer transition";
+
+  // Shared link styles
+  const linkClass =
+    "text-blue-500 hover:underline hover:text-blue-700 cursor-pointer inline-block mt-2";
+
+  return (
+    <div className="flex justify-center items-center min-h-screen bg-gray-50">
+      <div className={formWrapper}>
+        <div className="font-bold text-xl bg-zinc-800 rounded-t-2xl text-white py-2 mb-2 text-center">
+          {user === "tenant"
+            ? newUser
+              ? "Tenant Sign Up"
+              : "Tenant Login"
+            : newUser
+            ? "Owner Sign Up"
+            : "Owner Login"}
         </div>
-        <form className="h-7/8 p-8">
-          <div className="flex items-center my-2">
-            <label
-              className="w-1/3 text-left font-bold text-xl"
-              htmlFor="firstName"
-            >
-              First Name
-            </label>
-            <input
-              id="firstName"
-              type="text"
-              placeholder="Enter first name"
-              className="w-2/3 border-1 p-2 rounded-2xl"
-              onChange={(e) => setFirstName(e.target.value)}
-              value={firstName}
-            />
-          </div>
-          <div className="flex items-center my-2">
-            <label
-              className="w-1/3 text-left font-bold text-xl"
-              htmlFor="lastName"
-            >
-              Last Name
-            </label>
-            <input
-              id="lastName"
-              type="text"
-              placeholder="Enter last name"
-              className="w-2/3 border-1 p-2 rounded-2xl"
-              onChange={(e) => setLastName(e.target.value)}
-              value={lastName}
-            />
-          </div>
-          <div className="flex items-center my-2">
-            <label className="w-1/3 text-left font-bold text-xl" htmlFor="dob">
-              Date of Birth
-            </label>
-            <input
-              id="dob"
-              type="date"
-              className="w-2/3 border-1 p-2 rounded-2xl"
-              onChange={(e) => setDob(e.target.value)}
-              value={dob}
-            />
-          </div>
-          <div className="flex items-center my-2">
-            <label
-              className="w-1/3 text-left font-bold text-xl"
-              htmlFor="gender"
-            >
-              Gender
-            </label>
-            <select
-              id="gender"
-              className="w-2/3 border-1 p-2 rounded-2xl"
-              onChange={(e) => setGender(e.target.value)}
-              value={gender}
-            >
-              <option value="">Select gender</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-          <div className="flex items-center my-2">
-            <label
-              className="w-1/3 text-left font-bold text-xl"
-              htmlFor="mobile"
-            >
-              Mobile
-            </label>
-            <input
-              id="mobile"
-              type="tel"
-              placeholder="Enter mobile number"
-              className="w-2/3 border-1 p-2 rounded-2xl"
-              onChange={(e) => setMobile(e.target.value)}
-              value={mobile}
-            />
-          </div>
-          <div className="flex items-center my-2">
-            <label className="w-1/3 text-left font-bold text-xl" htmlFor="bio">
-              Bio
-            </label>
-            <textarea
-              id="bio"
-              placeholder="Tell us about yourself"
-              className="w-2/3 border-1 p-2 rounded-2xl"
-              onChange={(e) => setBio(e.target.value)}
-              value={bio}
-            />
-          </div>
-          <div className="flex items-center my-2">
-            <label
-              className="w-1/3 text-left font-bold text-xl"
-              htmlFor="email"
-            >
+        <form onSubmit={newUser ? handleSignUpUser : handleFetchUser}>
+          {newUser && (
+            <>
+              <div>
+                <label className={labelClass} htmlFor="firstName">
+                  First Name
+                </label>
+                <input
+                  id="firstName"
+                  type="text"
+                  placeholder="Enter first name"
+                  className={inputClass}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  value={firstName}
+                  required
+                />
+              </div>
+              <div>
+                <label className={labelClass} htmlFor="lastName">
+                  Last Name
+                </label>
+                <input
+                  id="lastName"
+                  type="text"
+                  placeholder="Enter last name"
+                  className={inputClass}
+                  onChange={(e) => setLastName(e.target.value)}
+                  value={lastName}
+                  required
+                />
+              </div>
+              <div>
+                <label className={labelClass} htmlFor="dob">
+                  Date of Birth
+                </label>
+                <input
+                  id="dob"
+                  type="date"
+                  className={inputClass}
+                  onChange={(e) => setDob(e.target.value)}
+                  value={dob}
+                  required
+                />
+              </div>
+              <div>
+                <label className={labelClass} htmlFor="gender">
+                  Gender
+                </label>
+                <select
+                  id="gender"
+                  className={inputClass}
+                  onChange={(e) => setGender(e.target.value)}
+                  value={gender}
+                  required
+                >
+                  <option value="">Select gender</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div>
+                <label className={labelClass} htmlFor="mobile">
+                  Mobile
+                </label>
+                <input
+                  id="mobile"
+                  type="tel"
+                  placeholder="Enter mobile number"
+                  className={inputClass}
+                  onChange={(e) => setMobile(e.target.value)}
+                  value={mobile}
+                  required
+                />
+              </div>
+              <div>
+                <label className={labelClass} htmlFor="bio">
+                  Bio
+                </label>
+                <textarea
+                  id="bio"
+                  placeholder="Tell us about yourself"
+                  className={inputClass}
+                  onChange={(e) => setBio(e.target.value)}
+                  value={bio}
+                  rows={2}
+                />
+              </div>
+            </>
+          )}
+          <div>
+            <label className={labelClass} htmlFor="email">
               Email address
             </label>
             <input
               id="email"
-              type="text"
+              type="email"
               placeholder="Enter email"
-              className="w-2/3 border-1 p-2 rounded-2xl"
+              className={inputClass}
               onChange={(e) => setEmail(e.target.value)}
               value={email}
+              required
             />
           </div>
-          <div className="flex items-center my-2">
-            <label
-              className="w-1/3 text-left font-bold text-xl"
-              htmlFor="password"
-            >
+          <div>
+            <label className={labelClass} htmlFor="password">
               Password
             </label>
             <input
               id="password"
-              type="text"
+              type="password"
               placeholder="Password"
-              className="w-2/3 border-1 p-2 rounded-2xl"
+              className={inputClass}
               onChange={(e) => setPassword(e.target.value)}
               value={password}
+              required
             />
           </div>
-          <div className="flex items-center my-2">
-            <span className="w-1/3"></span>
-            <p
-              className="text-left text-blue-400 hover:underline hover:cursor-pointer inline"
-              onClick={() => dispatch(addUser())}
-              tabIndex={0}
-              role="button"
-              onKeyPress={(e) => {
-                if (e.key === "Enter" || e.key === " ") dispatch(addUser());
-              }}
-            >
-              Existing user? Click here to Sign In
-            </p>
+          <div className="flex justify-between items-center mt-2">
+            {newUser ? (
+              <span
+                className={linkClass}
+                tabIndex={0}
+                role="button"
+                onClick={() => dispatch(addUser())}
+                onKeyPress={(e) => {
+                  if (e.key === "Enter" || e.key === " ") dispatch(addUser());
+                }}
+              >
+                Existing user? Click here to Sign In
+              </span>
+            ) : (
+              <span
+                className={linkClass}
+                tabIndex={0}
+                role="button"
+                onClick={() => dispatch(addUser())}
+                onKeyPress={(e) => {
+                  if (e.key === "Enter" || e.key === " ") dispatch(addUser());
+                }}
+              >
+                New user? Click here to Register
+              </span>
+            )}
           </div>
-          <button
-            className="m-6 w-4/10 h-12 font-bold text-white rounded-2xl border-1 bg-blue-400"
-            onClick={handleSignUpUser}
-          >
+          <button type="submit" className={buttonClass}>
             {user === "tenant"
-              ? "Tenant Portal Sign Up"
-              : "Owner Portal Sign Up"}
-          </button>
-        </form>
-      </div>
-    </div>
-  ) : (
-    <div className=" flex justify-center h-190">
-      <div className="w-3/7 rounded-2xl text-center m-36 shadow-2xl">
-        <div className="p-2 font-bold text-3xl bg-zinc-800 rounded-t-2xl text-white h-1/6 flex items-center justify-center">
-          {user === "tenant" ? "Tenant Login" : "Owner Login"}
-        </div>
-        <form className="h-5/6 p-8">
-          <h1 className="mt-2 text-left ml-38 my-2 font-bold text-xl">
-            Email address
-          </h1>
-          <input
-            type="text"
-            placeholder="Enter email"
-            className="w-3/5 border-1 p-4 rounded-2xl"
-            onChange={(e) => setEmail(e.target.value)}
-            value={email}
-          ></input>
-          <h1 className="text-left ml-38 my-2 font-bold text-xl">Password</h1>
-          <input
-            type="text"
-            placeholder="Password"
-            className=" w-3/5 border-1 p-4 rounded-2xl"
-            onChange={(e) => setPassword(e.target.value)}
-            value={password}
-          ></input>
-          <div className="flex items-center my-2">
-            <span className="w-1/3"></span>
-            <p
-              className="text-left text-blue-400 hover:underline hover:cursor-pointer inline"
-              onClick={() => dispatch(addUser())}
-              tabIndex={0}
-              role="button"
-              onKeyPress={(e) => {
-                if (e.key === "Enter" || e.key === " ") dispatch(addUser());
-              }}
-            >
-              New user? Click here to Register
-            </p>
-          </div>
-          <button
-            className="m-6 w-4/10 h-12 font-bold text-white rounded-2xl border-1 bg-blue-400"
-            onClick={handleFetchUser}
-          >
-            {user === "tenant"
-              ? "Tenant Portal Sign In"
+              ? newUser
+                ? "Tenant Portal Sign Up"
+                : "Tenant Portal Sign In"
+              : newUser
+              ? "Owner Portal Sign Up"
               : "Owner Portal Sign In"}
           </button>
         </form>
