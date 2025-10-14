@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { updateUser } from "../utils/Slices/UserSlice";
-import { useNavigate } from "react-router";
+import { updateUser } from "../../../utils/Slices/UserSlice";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const Profile = () => {

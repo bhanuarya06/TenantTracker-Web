@@ -1,7 +1,7 @@
 import { useDispatch, useSelector } from "react-redux";
-import { toggleMenu, whoIsUser } from "../utils/Slices/MenuSlice";
+import { toggleMenu, whoIsUser } from "../../../utils/Slices/MenuSlice";
 import { Link } from "react-router-dom";
-import MenuDropdown from "./MenuDropdown";
+import MenuDropdown from "../MenuDropdown";
 
 const Header = () => {
   const dispatch = useDispatch();

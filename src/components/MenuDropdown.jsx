@@ -1,24 +1,19 @@
 import { useDispatch, useSelector } from "react-redux";
 import { Link, Navigate, useNavigate } from "react-router-dom";
-import { toggleMenu, whoIsUser } from "../utils/Slices/MenuSlice";
-import { removeUser } from "../utils/Slices/UserSlice";
+import { toggleMenu, whoIsUser } from "../../utils/Slices/MenuSlice";
+import { removeUser } from "../../utils/Slices/UserSlice";
+import axios from "axios";
 
 const MenuDropdown = () => {
   const dispatch = useDispatch();
-  const user = useSelector((store) => store?.user?.firstName);
   const navigate = useNavigate();
 
-  const handleTenantLogin = () => {
-    dispatch(whoIsUser("tenant"));
-    dispatch(toggleMenu());
-  };
-  const handleOwnerLogin = () => {
-    dispatch(whoIsUser("owner"));
-    dispatch(toggleMenu());
-  };
-  const handleTenantLogout = () => {
+  const handleTenantLogout = async () => {
     dispatch(removeUser());
     dispatch(toggleMenu());
+    await axios.post('http://localhost:3000/logout',{
+      withCredentials : true
+    });
     navigate("/login");
   };
 
@@ -32,16 +27,16 @@ const MenuDropdown = () => {
           <li className="p-2 hover:bg-amber-400 text-md cursor-pointer">
             About
           </li>
-          <li className="p-2 hover:bg-amber-400 text-md cursor-pointer">
+          <Link to="/contact"><li className="p-2 hover:bg-amber-400 text-md cursor-pointer">
             Contact Us
-          </li>
+          </li></Link>
         </ul>
         <div className="border-t border-slate-200 mt-2 pt-2">
           <button
             className="w-full text-left p-2 hover:bg-amber-400 font-bold text-md rounded"
             onClick={handleTenantLogout}
           >
-            <Link to="/login">Logout</Link>
+            Logout
           </button>
         </div>
       </div>
