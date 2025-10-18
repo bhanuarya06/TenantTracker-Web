@@ -19,9 +19,16 @@ export const tenantService = {
     return response.data
   },
 
+  async deleteTenant(tenantId) {
+    const response = await apiClient.delete(API_ENDPOINTS.DELETE_TENANT, {
+      data: { _id: tenantId }
+    })
+    return response.data
+  },
+
   async getRentHistory(tenantId) {
-    const response = await apiClient.get(API_ENDPOINTS.RENT_HISTORY, {
-      data: { tenantId }
+    const response = await apiClient.post(API_ENDPOINTS.RENT_HISTORY, {
+      tenantId: tenantId
     })
     return response.data
   },

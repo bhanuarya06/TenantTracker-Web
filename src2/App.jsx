@@ -8,6 +8,9 @@ import { RegisterPage } from './pages/auth/RegisterPage'
 import { ProfilePage } from './pages/user/ProfilePage'
 import { DashboardPage } from './pages/dashboard/DashboardPage'
 import TenantsPage from './pages/tenants/TenantsPage'
+import AddTenantPage from './pages/tenants/AddTenantPage'
+import RentHistoryPage from './pages/tenants/RentHistoryPage'
+import AddBillPage from './pages/tenants/AddBillPage'
 import { ContactPage } from './pages/ContactPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 
@@ -26,6 +29,10 @@ function App() {
             <Route path="dashboard" element={<DashboardPage />} />
             <Route path="profile" element={<ProfilePage />} />
             <Route path="tenants" element={<TenantsPage />} />
+            <Route path="addtenant" element={<AddTenantPage />} />
+            <Route path="edittenant/:id" element={<AddTenantPage />} />
+            <Route path="rent-history" element={<RentHistoryPage />} />
+            <Route path="add-bill/:id" element={<AddBillPage />} />
           </Route>
           
           <Route path="*" element={<NotFoundPage />} />

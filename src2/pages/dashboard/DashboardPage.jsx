@@ -109,7 +109,7 @@ export const DashboardPage = () => {
                       title="Add New Tenant"
                       description="Register a new tenant to your property"
                       icon="👤"
-                      to={ROUTES.TENANTS}
+                      to={ROUTES.ADDTENANT}
                     />
                     <ActionCard
                       title="View All Tenants"
@@ -118,10 +118,10 @@ export const DashboardPage = () => {
                       to={ROUTES.TENANTS}
                     />
                     <ActionCard
-                      title="Property Reports"
-                      description="View financial and occupancy reports"
+                      title="Tenant Rent History"
+                      description="View rental payments and billing history"
                       icon="📊"
-                      to="#"
+                      to={ROUTES.RENT_HISTORY}
                     />
                     <ActionCard
                       title="Maintenance Hub"

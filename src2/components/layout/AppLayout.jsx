@@ -1,19 +1,45 @@
 import { Outlet } from 'react-router-dom'
-import { useEffect } from 'react'
-import { useSelector } from 'react-redux'
+import { useEffect, useRef } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 import { Header } from './Header'
 import { Footer } from './Footer'
 import { LoadingSpinner } from '../ui/LoadingSpinner'
-import { selectAuthLoading } from '../../store/slices/authSlice'
-import { useAuth } from '../../hooks/useAuth'
+import { selectAuthLoading, setLoading, setUser, clearUser } from '../../store/slices/authSlice'
+import { authService } from '../../services/authService'
 
 export const AppLayout = () => {
   const isLoading = useSelector(selectAuthLoading)
-  const { initializeAuth } = useAuth()
+  const dispatch = useDispatch()
+  const hasInitialized = useRef(false)
 
   useEffect(() => {
-    initializeAuth()
-  }, [initializeAuth])
+    // Only initialize auth once when the app starts
+    if (hasInitialized.current) return
+    
+    hasInitialized.current = true
+    
+    const initAuth = async () => {
+      // Skip auth check on public pages
+      const publicPaths = ['/login', '/register', '/']
+      if (publicPaths.includes(window.location.pathname)) {
+        return
+      }
+
+      try {
+        dispatch(setLoading(true))
+        const userData = await authService.getCurrentUser('owner')
+        if (userData) {
+          dispatch(setUser(userData.OwnerInfo || userData.TenantInfo || userData))
+        }
+      } catch {
+        dispatch(clearUser())
+      } finally {
+        dispatch(setLoading(false))
+      }
+    }
+
+    initAuth()
+  }, [dispatch])
 
   if (isLoading) {
     return (

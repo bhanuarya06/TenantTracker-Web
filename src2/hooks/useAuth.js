@@ -1,5 +1,5 @@
 import { useSelector, useDispatch } from 'react-redux'
-import { useCallback } from 'react'
+import { useCallback, useRef, useEffect } from 'react'
 import { authService } from '../services/authService'
 import {
   setLoading,
@@ -20,28 +20,60 @@ export const useAuth = () => {
   const userType = useSelector(selectUserType)
   const isAuthenticated = useSelector(selectIsAuthenticated)
   const isLoading = useSelector(selectAuthLoading)
+  const initializationRef = useRef(false)
+  const userTypeRef = useRef(userType)
+
+  // Update the ref when userType changes
+  useEffect(() => {
+    userTypeRef.current = userType
+  }, [userType])
 
   const initializeAuth = useCallback(async () => {
+    // Prevent multiple simultaneous initialization attempts
+    if (initializationRef.current || isAuthenticated || isLoading) {
+      return;
+    }
+
+    // Don't initialize on login/register pages
+    const currentPath = window.location.pathname;
+    if (currentPath.includes('/login') || currentPath.includes('/register')) {
+      return;
+    }
+
     try {
+      initializationRef.current = true;
       dispatch(setLoading(true))
+      
       // Add timeout to prevent hanging
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Request timeout')), 5000)
+        setTimeout(() => reject(new Error('Request timeout')), 10000)
       )
       
+      // Use ref to avoid dependency issues
+      const currentUserType = userTypeRef.current || 'owner';
+      
       const userData = await Promise.race([
-        authService.getCurrentUser(userType),
+        authService.getCurrentUser(currentUserType),
         timeoutPromise
       ])
-      dispatch(setUser(userData.OwnerInfo || userData.TenantInfo || userData))
-    } catch (error) {
+      
+      if (userData && (userData.OwnerInfo || userData.TenantInfo || userData.firstName)) {
+        dispatch(setUser(userData.OwnerInfo || userData.TenantInfo || userData))
+      } else {
+        dispatch(clearUser())
+      }
+    } catch (authError) {
       // User not authenticated or error occurred
-      console.log('Auth initialization failed:', error.message)
+      console.log('Auth initialization failed:', authError.message)
       dispatch(clearUser())
     } finally {
       dispatch(setLoading(false))
+      // Reset the ref after a delay to allow for future attempts if needed
+      setTimeout(() => {
+        initializationRef.current = false;
+      }, 1000);
     }
-  }, [dispatch, userType])
+  }, [dispatch, isAuthenticated, isLoading])
 
   const login = useCallback(async (credentials) => {
     try {

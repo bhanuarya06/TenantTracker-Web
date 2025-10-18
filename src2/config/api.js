@@ -14,6 +14,7 @@ export const API_ENDPOINTS = {
   TENANTS: '/owner/manageTenant/viewTenants',
   ADD_TENANT: '/owner/manageTenant/addTenant',
   UPDATE_TENANT: '/owner/manageTenant/updateTenant',
+  DELETE_TENANT: '/owner/manageTenant/deleteTenant',
   
   // Bill management endpoints
   CREATE_BILL: '/owner/manageTenant/billTenant',
