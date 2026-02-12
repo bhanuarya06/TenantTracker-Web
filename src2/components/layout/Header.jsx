@@ -55,12 +55,22 @@ export const Header = () => {
                 Home
               </Link>
               {isAuthenticated && (
-                <Link
-                  to={ROUTES.DASHBOARD}
-                  className="text-gray-600 hover:text-gray-900 transition-colors"
-                >
-                  Dashboard
-                </Link>
+                <>
+                  <Link
+                    to={ROUTES.DASHBOARD}
+                    className="text-gray-600 hover:text-gray-900 transition-colors"
+                  >
+                    Dashboard
+                  </Link>
+                  {userType === USER_TYPES.OWNER && (
+                    <Link
+                      to={ROUTES.PROPERTIES}
+                      className="text-gray-600 hover:text-gray-900 transition-colors"
+                    >
+                      Properties
+                    </Link>
+                  )}
+                </>
               )}
               <Link
                 to={ROUTES.CONTACT}

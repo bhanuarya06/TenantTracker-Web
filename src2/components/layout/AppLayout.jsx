@@ -1,52 +1,41 @@
-import { Outlet } from 'react-router-dom'
-import { useEffect, useRef } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
-import { Header } from './Header'
-import { Footer } from './Footer'
-import { LoadingSpinner } from '../ui/LoadingSpinner'
-import { selectAuthLoading, setLoading, setUser, clearUser } from '../../store/slices/authSlice'
-import { authService } from '../../services/authService'
+import { useEffect } from "react";
+import { Outlet, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { Header } from "./Header";
+import { Footer } from "./Footer";
+import { LoadingSpinner } from "../ui/LoadingSpinner";
+import { selectAuthLoading } from "../../store/slices/authSlice";
+import { useAuth } from "../../hooks/useAuth";
 
 export const AppLayout = () => {
-  const isLoading = useSelector(selectAuthLoading)
-  const dispatch = useDispatch()
-  const hasInitialized = useRef(false)
+  const isLoading = useSelector(selectAuthLoading);
+  const location = useLocation();
+  const { initializeAuth } = useAuth();
 
   useEffect(() => {
-    // Only initialize auth once when the app starts
-    if (hasInitialized.current) return
-    
-    hasInitialized.current = true
-    
-    const initAuth = async () => {
-      // Skip auth check on public pages
-      const publicPaths = ['/login', '/register', '/']
-      if (publicPaths.includes(window.location.pathname)) {
-        return
-      }
+    initializeAuth();
+  }, [initializeAuth]);
 
-      try {
-        dispatch(setLoading(true))
-        const userData = await authService.getCurrentUser('owner')
-        if (userData) {
-          dispatch(setUser(userData.OwnerInfo || userData.TenantInfo || userData))
-        }
-      } catch {
-        dispatch(clearUser())
-      } finally {
-        dispatch(setLoading(false))
-      }
-    }
+  // Never show loading spinner on auth pages to prevent component remounting
+  const isAuthPage =
+    location.pathname === "/login" || location.pathname === "/register";
 
-    initAuth()
-  }, [dispatch])
+  console.log(
+    "AppLayout render: isLoading:",
+    isLoading,
+    "isAuthPage:",
+    isAuthPage,
+    "path:",
+    location.pathname,
+  );
 
-  if (isLoading) {
+  if (isLoading && !isAuthPage) {
+    console.log("AppLayout: Showing loading spinner for non-auth page");
     return (
       <div className="min-h-screen flex items-center justify-center">
         <LoadingSpinner size="lg" />
       </div>
-    )
+    );
   }
 
   return (
@@ -57,5 +46,5 @@ export const AppLayout = () => {
       </main>
       <Footer />
     </div>
-  )
-}
+  );
+};

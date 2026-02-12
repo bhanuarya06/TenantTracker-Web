@@ -13,9 +13,7 @@ export const tenantService = {
   },
 
   async updateTenant(tenantId, tenantData) {
-    // Add the tenant ID to the request body as your backend expects it
-    const updateData = { ...tenantData, _id: tenantId }
-    const response = await apiClient.put(API_ENDPOINTS.UPDATE_TENANT, updateData)
+    const response = await apiClient.put(API_ENDPOINTS.UPDATE_TENANT(tenantId), tenantData)
     return response.data
   },
 

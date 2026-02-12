@@ -17,7 +17,13 @@ export const ProfilePage = () => {
     dob: '',
     gender: '',
     mobile: '',
-    address: '',
+    address: {
+      street: '',
+      city: '',
+      state: '',
+      zipCode: '',
+      country: ''
+    },
     bio: '',
   })
   const [errors, setErrors] = useState({})
@@ -26,13 +32,55 @@ export const ProfilePage = () => {
   // Initialize form data when user data loads
   useEffect(() => {
     if (user) {
+      // Handle address field - ensure it's an object with all required fields
+      const getAddressObject = (address) => {
+        if (!address) {
+          return {
+            street: '',
+            city: '',
+            state: '',
+            zipCode: '',
+            country: ''
+          }
+        }
+        
+        if (typeof address === 'object') {
+          return {
+            street: address.street || '',
+            city: address.city || '',
+            state: address.state || '',
+            zipCode: address.zipCode || '',
+            country: address.country || ''
+          }
+        }
+        
+        // If it's a string, try to parse it (legacy support)
+        if (typeof address === 'string') {
+          return {
+            street: address,
+            city: '',
+            state: '',
+            zipCode: '',
+            country: ''
+          }
+        }
+        
+        return {
+          street: '',
+          city: '',
+          state: '',
+          zipCode: '',
+          country: ''
+        }
+      }
+
       setFormData({
         firstName: user.firstName || '',
         lastName: user.lastName || '',
-        dob: user.dob ? user.dob.slice(0, 10) : '',
+        dob: user.dob ? user.dob.slice(0, 10) : (user.dateOfBirth ? user.dateOfBirth.slice(0, 10) : ''),
         gender: user.gender || '',
-        mobile: user.mobile || '',
-        address: user.address || '',
+        mobile: user.mobile || user.phone || '',
+        address: getAddressObject(user.address),
         bio: user.bio || '',
       })
     }
@@ -79,16 +127,74 @@ export const ProfilePage = () => {
     }
   }
 
+  const handleAddressChange = (e) => {
+    const { name, value } = e.target
+    setFormData(prev => ({
+      ...prev,
+      address: {
+        ...prev.address,
+        [name]: value
+      }
+    }))
+    
+    // Clear address errors when user starts typing
+    if (errors[`address.${name}`]) {
+      setErrors(prev => ({ ...prev, [`address.${name}`]: '' }))
+    }
+  }
+
   const handleCancel = () => {
     // Reset form data to original user data
     if (user) {
+      // Handle address field - ensure it's an object with all required fields
+      const getAddressObject = (address) => {
+        if (!address) {
+          return {
+            street: '',
+            city: '',
+            state: '',
+            zipCode: '',
+            country: ''
+          }
+        }
+        
+        if (typeof address === 'object') {
+          return {
+            street: address.street || '',
+            city: address.city || '',
+            state: address.state || '',
+            zipCode: address.zipCode || '',
+            country: address.country || ''
+          }
+        }
+        
+        // If it's a string, try to parse it (legacy support)
+        if (typeof address === 'string') {
+          return {
+            street: address,
+            city: '',
+            state: '',
+            zipCode: '',
+            country: ''
+          }
+        }
+        
+        return {
+          street: '',
+          city: '',
+          state: '',
+          zipCode: '',
+          country: ''
+        }
+      }
+
       setFormData({
         firstName: user.firstName || '',
         lastName: user.lastName || '',
-        dob: user.dob ? user.dob.slice(0, 10) : '',
+        dob: user.dob ? user.dob.slice(0, 10) : (user.dateOfBirth ? user.dateOfBirth.slice(0, 10) : ''),
         gender: user.gender || '',
-        mobile: user.mobile || '',
-        address: user.address || '',
+        mobile: user.mobile || user.phone || '',
+        address: getAddressObject(user.address),
         bio: user.bio || '',
       })
     }
@@ -232,18 +338,95 @@ export const ProfilePage = () => {
                       )}
                     </div>
 
-                    <div>
-                      <label htmlFor="address" className="block text-sm font-medium text-gray-700">
-                        Address
-                      </label>
-                      <input
-                        id="address"
-                        name="address"
-                        type="text"
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                        value={formData.address}
-                        onChange={handleInputChange}
-                      />
+                    {/* Address Fields */}
+                    <div className="col-span-2">
+                      <h4 className="text-md font-medium text-gray-900 mb-3">Address</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label htmlFor="street" className="block text-sm font-medium text-gray-700">
+                            Street Address
+                          </label>
+                          <input
+                            id="street"
+                            name="street"
+                            type="text"
+                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            value={formData.address.street}
+                            onChange={handleAddressChange}
+                          />
+                          {errors['address.street'] && (
+                            <p className="mt-1 text-sm text-red-600">{errors['address.street']}</p>
+                          )}
+                        </div>
+
+                        <div>
+                          <label htmlFor="city" className="block text-sm font-medium text-gray-700">
+                            City
+                          </label>
+                          <input
+                            id="city"
+                            name="city"
+                            type="text"
+                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            value={formData.address.city}
+                            onChange={handleAddressChange}
+                          />
+                          {errors['address.city'] && (
+                            <p className="mt-1 text-sm text-red-600">{errors['address.city']}</p>
+                          )}
+                        </div>
+
+                        <div>
+                          <label htmlFor="state" className="block text-sm font-medium text-gray-700">
+                            State/Province
+                          </label>
+                          <input
+                            id="state"
+                            name="state"
+                            type="text"
+                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            value={formData.address.state}
+                            onChange={handleAddressChange}
+                          />
+                          {errors['address.state'] && (
+                            <p className="mt-1 text-sm text-red-600">{errors['address.state']}</p>
+                          )}
+                        </div>
+
+                        <div>
+                          <label htmlFor="zipCode" className="block text-sm font-medium text-gray-700">
+                            ZIP/Postal Code
+                          </label>
+                          <input
+                            id="zipCode"
+                            name="zipCode"
+                            type="text"
+                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            value={formData.address.zipCode}
+                            onChange={handleAddressChange}
+                          />
+                          {errors['address.zipCode'] && (
+                            <p className="mt-1 text-sm text-red-600">{errors['address.zipCode']}</p>
+                          )}
+                        </div>
+
+                        <div className="col-span-2">
+                          <label htmlFor="country" className="block text-sm font-medium text-gray-700">
+                            Country
+                          </label>
+                          <input
+                            id="country"
+                            name="country"
+                            type="text"
+                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            value={formData.address.country}
+                            onChange={handleAddressChange}
+                          />
+                          {errors['address.country'] && (
+                            <p className="mt-1 text-sm text-red-600">{errors['address.country']}</p>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -309,7 +492,7 @@ export const ProfilePage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <InfoCard
                     title="Date of Birth"
-                    value={user.dob ? new Date(user.dob).toLocaleDateString() : 'Not provided'}
+                    value={(user.dob || user.dateOfBirth) ? new Date(user.dob || user.dateOfBirth).toLocaleDateString() : 'Not provided'}
                   />
                   <InfoCard
                     title="Gender"
@@ -317,12 +500,41 @@ export const ProfilePage = () => {
                   />
                   <InfoCard
                     title="Mobile Number"
-                    value={user.mobile || 'Not provided'}
+                    value={user.mobile || user.phone || 'Not provided'}
                   />
-                  <InfoCard
-                    title="Address"
-                    value={user.address || 'Not provided'}
-                  />
+                </div>
+
+                {/* Address Section */}
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-3">Address</h3>
+                  {user.address && (typeof user.address === 'object') ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <InfoCard
+                        title="Street Address"
+                        value={user.address.street || 'Not provided'}
+                      />
+                      <InfoCard
+                        title="City"
+                        value={user.address.city || 'Not provided'}
+                      />
+                      <InfoCard
+                        title="State/Province"
+                        value={user.address.state || 'Not provided'}
+                      />
+                      <InfoCard
+                        title="ZIP/Postal Code"
+                        value={user.address.zipCode || 'Not provided'}
+                      />
+                      <InfoCard
+                        title="Country"
+                        value={user.address.country || 'Not provided'}
+                      />
+                    </div>
+                  ) : (
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <p className="text-gray-500">No address information provided</p>
+                    </div>
+                  )}
                 </div>
 
                 {user.bio && (
@@ -340,9 +552,36 @@ export const ProfilePage = () => {
   )
 }
 
-const InfoCard = ({ title, value }) => (
-  <div className="bg-gray-50 rounded-lg p-4">
-    <dt className="text-sm font-medium text-gray-500">{title}</dt>
-    <dd className="mt-1 text-sm text-gray-900">{value}</dd>
-  </div>
-)
+const InfoCard = ({ title, value }) => {
+  // Handle different value types safely
+  const renderValue = () => {
+    if (value === null || value === undefined) {
+      return 'Not provided'
+    }
+    
+    if (typeof value === 'object') {
+      // If it's an address object, format it as a string
+      if (value.street || value.city || value.state || value.zipCode) {
+        const parts = [
+          value.street,
+          value.city,
+          value.state,
+          value.zipCode
+        ].filter(Boolean)
+        return parts.length > 0 ? parts.join(', ') : 'Not provided'
+      }
+      // If it's some other object, stringify it or return default
+      return JSON.stringify(value) || 'Not provided'
+    }
+    
+    // If it's already a string/number, return as is
+    return value || 'Not provided'
+  }
+
+  return (
+    <div className="bg-gray-50 rounded-lg p-4">
+      <dt className="text-sm font-medium text-gray-500">{title}</dt>
+      <dd className="mt-1 text-sm text-gray-900">{renderValue()}</dd>
+    </div>
+  )
+}

@@ -129,8 +129,8 @@ export const selectLastFetched = (state) => state.tenant.lastFetched
 export const selectTenantById = (state, tenantId) => 
   state.tenant.tenants.find(tenant => tenant._id === tenantId)
 
-export const selectTenantsByRoom = (state) => 
-  state.tenant.tenants.sort((a, b) => (a.roomNum || '').localeCompare(b.roomNum || ''))
+export const selectTenantsByUnit = (state) => 
+  state.tenant.tenants.sort((a, b) => (a.unit || '').localeCompare(b.unit || ''))
 
 export const selectTenantsWithPendingBalance = (state) =>
   state.tenant.tenants.filter(tenant => 

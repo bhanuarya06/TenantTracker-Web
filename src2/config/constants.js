@@ -4,6 +4,9 @@ export const ROUTES = {
   REGISTER: '/register',
   DASHBOARD: '/dashboard',
   PROFILE: '/profile',
+  PROPERTIES: '/properties',
+  ADD_PROPERTY: '/add-property',
+  EDIT_PROPERTY: (id) => `/edit-property/${id}`,
   TENANTS: '/tenants',
   ADDTENANT: '/addtenant',
   EDITTENANT: (id) => `/edittenant/${id}`,
@@ -19,7 +22,7 @@ export const USER_TYPES = {
 
 export const FORM_VALIDATION = {
   EMAIL_REGEX: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-  PASSWORD_MIN_LENGTH: 6,
+  PASSWORD_MIN_LENGTH: 8,
   PHONE_REGEX: /^\+?[\d\s-()]+$/,
 }
 

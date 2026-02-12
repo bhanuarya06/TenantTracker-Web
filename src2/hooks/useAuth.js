@@ -6,6 +6,7 @@ import {
   setUser,
   clearUser,
   setError,
+  setUserType,
   selectUser,
   selectUserType,
   selectIsAuthenticated,
@@ -34,9 +35,10 @@ export const useAuth = () => {
       return;
     }
 
-    // Don't initialize on login/register pages
+    // Don't initialize on login/register pages - exit without any Redux dispatches
     const currentPath = window.location.pathname;
     if (currentPath.includes('/login') || currentPath.includes('/register')) {
+      console.log('Auth: Skipping initialization on auth pages to prevent remounting')
       return;
     }
 
@@ -49,17 +51,24 @@ export const useAuth = () => {
         setTimeout(() => reject(new Error('Request timeout')), 10000)
       )
       
-      // Use ref to avoid dependency issues
-      const currentUserType = userTypeRef.current || 'owner';
-      
       const userData = await Promise.race([
-        authService.getCurrentUser(currentUserType),
+        authService.getCurrentUser(),
         timeoutPromise
       ])
       
-      if (userData && (userData.OwnerInfo || userData.TenantInfo || userData.firstName)) {
-        dispatch(setUser(userData.OwnerInfo || userData.TenantInfo || userData))
+      // Handle new unified User model response structure
+      const user = userData.data?.user || userData.user || userData.data || userData
+      
+      // Validate user data matches new User model structure
+      if (user && user.email && user.role && (user.id || user._id)) {
+        dispatch(setUser(user))
+        
+        // Set user type from the response role (owner/tenant/admin)
+        dispatch(setUserType(user.role))
+        
+        console.log('Auth initialization successful for user:', user.email, 'role:', user.role)
       } else {
+        console.log('No valid user data found or invalid format, clearing auth state')
         dispatch(clearUser())
       }
     } catch (authError) {
@@ -75,14 +84,54 @@ export const useAuth = () => {
     }
   }, [dispatch, isAuthenticated, isLoading])
 
-  const login = useCallback(async (credentials) => {
+  const login = useCallback(async (loginData) => {
     try {
       dispatch(setLoading(true))
-      const response = await authService.login(credentials, userType)
-      const userData = response.OwnerInfo || response.TenantInfo || response
-      dispatch(setUser(userData))
-      toast.success('Login successful!')
-      return { success: true, data: userData }
+      
+      // Add role to login data for unified API
+      const requestData = {
+        ...loginData,
+        role: userType
+      }
+      
+      console.log('useAuth: Attempting login with:', requestData)
+      
+      const response = await authService.login(requestData)
+      
+      console.log('Login response:', response)
+      
+      // Handle backend controller response: { success: true, data: { user: {...}, token: "..." }, message: "..." }
+      if (response.success && response.data) {
+        const userData = response.data.user
+        const token = response.data.token
+        
+        console.log('Extracted user data:', userData)
+        console.log('Token received:', !!token)
+        
+        // Validate user data has required fields from User model
+        if (userData && userData.email && userData.role) {
+          dispatch(setUser(userData))
+          console.log('Dispatched setUser with:', userData)
+          
+          // Set user type from the response role (owner/tenant/admin)
+          dispatch(setUserType(userData.role))
+          console.log('Set user type to:', userData.role)
+          
+          // Store token if needed (for future API calls)
+          if (token) {
+            localStorage.setItem('auth_token', token)
+          }
+          
+          toast.success('Login successful!')
+          return { success: true, data: userData }
+        } else {
+          console.error('Invalid user data received:', userData)
+          throw new Error('Invalid user data received from server')
+        }
+      } else {
+        console.error('Login failed - invalid response structure:', response)
+        throw new Error(response.message || 'Login failed')
+      }
     } catch (error) {
       dispatch(setError(error.message))
       toast.error(error.message)
@@ -95,9 +144,42 @@ export const useAuth = () => {
   const register = useCallback(async (userData) => {
     try {
       dispatch(setLoading(true))
-      const response = await authService.register(userData, userType)
-      const user = response.OwnerInfo || response.TenantInfo || response
-      dispatch(setUser(user))
+      
+      // Add role to userData for unified API
+      const registerData = {
+        ...userData,
+        role: userType
+      }
+      
+      const response = await authService.register(registerData)
+      
+      console.log('Registration response:', response)
+      
+      // Handle backend controller response: { success: true, data: { user: {...}, token: "..." }, message: "..." }
+      if (response.success && response.data) {
+        const user = response.data.user
+        const token = response.data.token
+        
+        console.log('Extracted user data:', user)
+        
+        // Validate user data has required fields from User model
+        if (user && user.email && user.role) {
+          dispatch(setUser(user))
+          dispatch(setUserType(user.role))
+          
+          // Store token if needed
+          if (token) {
+            localStorage.setItem('auth_token', token)
+          }
+        } else {
+          console.error('Invalid user data in registration response:', user)
+          throw new Error('Invalid user data received from server')
+        }
+      } else {
+        console.error('Registration failed - invalid response structure:', response)
+        throw new Error(response.message || 'Registration failed')
+      }
+      
       toast.success('Registration successful!')
       return { success: true, data: user }
     } catch (error) {
@@ -126,11 +208,31 @@ export const useAuth = () => {
   const updateProfile = useCallback(async (profileData) => {
     try {
       dispatch(setLoading(true))
-      const response = await authService.updateProfile(profileData, userType)
-      const updatedUser = response.owner || response.tenant || response
-      dispatch(setUser(updatedUser))
-      toast.success('Profile updated successfully!')
-      return { success: true, data: updatedUser }
+      const response = await authService.updateProfile(profileData)
+      
+      console.log('Profile update response:', response)
+      
+      // Handle backend controller response: { success: true, data: { user: {...} }, message: "..." }
+      if (response.success && response.data) {
+        const updatedUser = response.data.user
+        
+        console.log('Extracted updated user data:', updatedUser)
+        
+        // Validate updated user data
+        if (updatedUser && updatedUser.email && updatedUser.role) {
+          dispatch(setUser(updatedUser))
+          dispatch(setUserType(updatedUser.role))
+          
+          toast.success('Profile updated successfully!')
+          return { success: true, data: updatedUser }
+        } else {
+          console.error('Invalid updated user data in response:', updatedUser)
+          throw new Error('Invalid user data received from server')
+        }
+      } else {
+        console.error('Profile update failed - invalid response structure:', response)
+        throw new Error(response.message || 'Profile update failed')
+      }
     } catch (error) {
       dispatch(setError(error.message))
       toast.error(error.message)
@@ -138,7 +240,7 @@ export const useAuth = () => {
     } finally {
       dispatch(setLoading(false))
     }
-  }, [dispatch, userType])
+  }, [dispatch])
 
   return {
     user,

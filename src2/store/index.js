@@ -3,6 +3,8 @@ import { authSlice } from './slices/authSlice'
 import { userSlice } from './slices/userSlice'
 import { uiSlice } from './slices/uiSlice'
 import { tenantSlice } from './slices/tenantSlice'
+import propertyReducer from './slices/propertySlice'
+import billReducer from './slices/billSlice'
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +12,8 @@ export const store = configureStore({
     user: userSlice.reducer,
     ui: uiSlice.reducer,
     tenant: tenantSlice.reducer,
+    property: propertyReducer,
+    bill: billReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

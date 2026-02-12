@@ -2,13 +2,23 @@ import { apiClient } from './apiClient'
 import { API_ENDPOINTS } from '../config/api'
 
 export const authService = {
-  async login(credentials, userType) {
-    const response = await apiClient.post(API_ENDPOINTS.LOGIN(userType), credentials)
+  async login(credentials) {
+    // Include role in the request body for unified login endpoint
+    const loginData = {
+      ...credentials,
+      role: credentials.role || 'owner' // Default to owner if not specified
+    }
+    const response = await apiClient.post(API_ENDPOINTS.LOGIN, loginData)
     return response.data
   },
 
-  async register(userData, userType) {
-    const response = await apiClient.post(API_ENDPOINTS.REGISTER(userType), userData)
+  async register(userData) {
+    // Include role in the request body for unified register endpoint  
+    const registerData = {
+      ...userData,
+      role: userData.role || 'owner' // Default to owner if not specified
+    }
+    const response = await apiClient.post(API_ENDPOINTS.REGISTER, registerData)
     return response.data
   },
 
@@ -17,13 +27,13 @@ export const authService = {
     return response.data
   },
 
-  async getCurrentUser(userType) {
-    const response = await apiClient.get(API_ENDPOINTS.PROFILE(userType))
+  async getCurrentUser() {
+    const response = await apiClient.get(API_ENDPOINTS.PROFILE)
     return response.data
   },
 
-  async updateProfile(userData, userType) {
-    const response = await apiClient.put(API_ENDPOINTS.UPDATE_PROFILE(userType), userData)
+  async updateProfile(userData) {
+    const response = await apiClient.put(API_ENDPOINTS.UPDATE_PROFILE, userData)
     return response.data
   },
 }

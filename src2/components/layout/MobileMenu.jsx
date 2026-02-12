@@ -75,13 +75,22 @@ export const MobileMenu = ({
                   Profile
                 </Link>
                 {userType === USER_TYPES.OWNER && (
-                  <Link
-                    to={ROUTES.TENANTS}
-                    onClick={onClose}
-                    className="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100 transition-colors"
-                  >
-                    Tenants
-                  </Link>
+                  <>
+                    <Link
+                      to={ROUTES.PROPERTIES}
+                      onClick={onClose}
+                      className="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100 transition-colors"
+                    >
+                      Properties
+                    </Link>
+                    <Link
+                      to={ROUTES.TENANTS}
+                      onClick={onClose}
+                      className="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100 transition-colors"
+                    >
+                      Tenants
+                    </Link>
+                  </>
                 )}
               </>
             )}

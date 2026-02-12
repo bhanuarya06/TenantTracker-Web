@@ -7,6 +7,8 @@ import { LoginPage } from './pages/auth/LoginPage'
 import { RegisterPage } from './pages/auth/RegisterPage'
 import { ProfilePage } from './pages/user/ProfilePage'
 import { DashboardPage } from './pages/dashboard/DashboardPage'
+import PropertiesPage from './pages/properties/PropertiesPage'
+import AddPropertyPage from './pages/properties/AddPropertyPage'
 import TenantsPage from './pages/tenants/TenantsPage'
 import AddTenantPage from './pages/tenants/AddTenantPage'
 import RentHistoryPage from './pages/tenants/RentHistoryPage'
@@ -28,6 +30,9 @@ function App() {
           <Route element={<ProtectedRoute />}>
             <Route path="dashboard" element={<DashboardPage />} />
             <Route path="profile" element={<ProfilePage />} />
+            <Route path="properties" element={<PropertiesPage />} />
+            <Route path="add-property" element={<AddPropertyPage />} />
+            <Route path="edit-property/:id" element={<AddPropertyPage />} />
             <Route path="tenants" element={<TenantsPage />} />
             <Route path="addtenant" element={<AddTenantPage />} />
             <Route path="edittenant/:id" element={<AddTenantPage />} />

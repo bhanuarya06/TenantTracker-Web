@@ -1,14 +1,17 @@
 import { useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
-import { selectUser, selectUserType } from '../../store/slices/authSlice'
+import { selectUser } from '../../store/slices/authSlice'
 import { Button } from '../../components/ui/Button'
-import { ROUTES, USER_TYPES } from '../../config/constants'
+import { ROUTES } from '../../config/constants'
 
 export const DashboardPage = () => {
   const user = useSelector(selectUser)
-  const userType = useSelector(selectUserType)
 
-  const isOwner = userType === USER_TYPES.OWNER
+  // Determine user role from unified User model (role: 'owner' | 'tenant' | 'admin')
+  const isOwner = user?.role === 'owner'
+  const isTenant = user?.role === 'tenant'
+
+  console.log('Dashboard - User role:', user?.role, 'isOwner:', isOwner, 'isTenant:', isTenant)
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -16,14 +19,16 @@ export const DashboardPage = () => {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">
-            Welcome back, {user?.firstName}!
+            Welcome back, {user?.firstName || user?.email}!
           </h1>
           <p className="text-gray-600 mt-2">
-            {isOwner 
-              ? 'Manage your properties and tenants from your dashboard'
-              : 'View your rental information and communicate with your landlord'
-            }
+            {isOwner && 'Manage your properties and tenants from your dashboard'}
+            {isTenant && 'View your rental information and communicate with your landlord'}
+            {user?.role === 'admin' && 'System administration dashboard'}
           </p>
+          <div className="mt-2 text-sm text-blue-600">
+            Logged in as: {user?.role} | Email: {user?.email}
+          </div>
         </div>
 
         {/* Quick Stats */}

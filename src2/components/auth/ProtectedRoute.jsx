@@ -9,7 +9,14 @@ export const ProtectedRoute = () => {
   const isLoading = useSelector(selectAuthLoading)
   const location = useLocation()
 
+  console.log('ProtectedRoute check:', { 
+    isAuthenticated, 
+    isLoading, 
+    path: location.pathname 
+  })
+
   if (isLoading) {
+    console.log('ProtectedRoute: Showing loading spinner')
     return (
       <div className="min-h-screen flex items-center justify-center">
         <LoadingSpinner size="lg" />
@@ -18,6 +25,7 @@ export const ProtectedRoute = () => {
   }
 
   if (!isAuthenticated) {
+    console.log('ProtectedRoute: User not authenticated, redirecting to login')
     // Redirect to login page with return URL
     return (
       <Navigate
@@ -28,5 +36,6 @@ export const ProtectedRoute = () => {
     )
   }
 
+  console.log('ProtectedRoute: User authenticated, allowing access')
   return <Outlet />
 }

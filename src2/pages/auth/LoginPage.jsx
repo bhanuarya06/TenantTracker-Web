@@ -50,14 +50,49 @@ export const LoginPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    console.log('LoginPage: Form submitted, preventing default')
+    console.log('LoginPage: Form data:', formData)
     
-    if (!validateForm()) return
+    if (!validateForm()) {
+      console.log('LoginPage: Form validation failed')
+      return
+    }
 
-    const result = await login(formData)
-    
-    if (result.success) {
-      const from = location.state?.from || ROUTES.DASHBOARD
-      navigate(from, { replace: true })
+    try {
+      console.log('LoginPage: Calling login with:', formData)
+      const result = await login(formData)
+      console.log('LoginPage: Login result received:', result)
+      
+      if (result.success) {
+        console.log('LoginPage: Login result success:', result)
+        
+        // Implement role-based redirect as per API specification
+        const user = result.data
+        console.log('LoginPage: User data from result:', user)
+        
+        let redirectPath
+        
+        if (user.role === 'owner') {
+          redirectPath = '/dashboard' // Owner dashboard
+        } else if (user.role === 'tenant') {
+          redirectPath = '/dashboard' // Tenant dashboard (same route, different data)
+        } else {
+          // Fallback to default dashboard
+          redirectPath = location.state?.from || ROUTES.DASHBOARD
+        }
+        
+        console.log('LoginPage: Redirecting to:', redirectPath, 'for role:', user.role)
+        
+        // Add a small delay to ensure Redux state is updated
+        setTimeout(() => {
+          navigate(redirectPath, { replace: true })
+        }, 100)
+        
+      } else {
+        console.error('Login failed:', result.error)
+      }
+    } catch (error) {
+      console.error('Login error:', error)
     }
   }
 
