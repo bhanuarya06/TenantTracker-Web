@@ -7,6 +7,11 @@ export const billService = {
     return response.data
   },
 
+  async getBillsByTenantId(tenantId) {
+    const response = await apiClient.get(`${API_ENDPOINTS.BILLS}/tenant/${tenantId}`)
+    return response.data
+  },
+
   async getBillById(id) {
     const response = await apiClient.get(`${API_ENDPOINTS.BILLS}/${id}`)
     return response.data
@@ -28,7 +33,7 @@ export const billService = {
   },
 
   async sendBill(id) {
-    const response = await apiClient.post(`${API_ENDPOINTS.BILLS}/${id}/send`)
+    const response = await apiClient.post(API_ENDPOINTS.SEND_BILL(id))
     return response.data
   },
 

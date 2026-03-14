@@ -1,5 +1,4 @@
-// Utility function for conditional classes
-const clsx = (...classes) => classes.filter(Boolean).join(' ')
+import { clsx } from 'clsx';
 
 const variants = {
   primary: 'bg-blue-600 hover:bg-blue-700 text-white',

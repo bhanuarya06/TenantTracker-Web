@@ -24,12 +24,15 @@ export const API_ENDPOINTS = {
   ADD_TENANT: '/tenants',
   UPDATE_TENANT: (id) => `/tenants/${id}`,
   DELETE_TENANT: (id) => `/tenants/${id}`,
+  RENT_HISTORY: (id) => `/tenants/${id}/bills`,
   
   // Bill management endpoints
   BILLS: '/bills',
   CREATE_BILL: '/bills',
   UPDATE_BILL: (id) => `/bills/${id}`,
   DELETE_BILL: (id) => `/bills/${id}`,
+  GET_BILL: (id) => `/bills/${id}`,
+  SEND_BILL: (id) => `/bills/${id}/send`,
   GENERATE_RECURRING_BILLS: '/bills/generate-recurring', // Owner-only
   
   // Payment management endpoints  

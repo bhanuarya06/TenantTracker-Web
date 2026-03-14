@@ -21,13 +21,13 @@ export const UserDropdown = ({ user, onLogout }) => {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition-colors"
+        className="flex items-center space-x-3 px-4 py-2 rounded-xl bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-blue-400/50 hover:border-cyan-400 hover:from-blue-500/30 hover:to-cyan-500/30 transition-all duration-300 group"
       >
-        <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-medium text-sm">
+        <div className="w-9 h-9 bg-gradient-to-br from-blue-400 to-cyan-400 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg group-hover:shadow-cyan-500/50 transition-shadow">
           {user?.firstName?.charAt(0)?.toUpperCase() || 'U'}
         </div>
         <svg
-          className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          className={`w-5 h-5 text-cyan-300 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -42,38 +42,44 @@ export const UserDropdown = ({ user, onLogout }) => {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
-          <div className="px-4 py-2 border-b border-gray-100">
-            <p className="font-medium text-gray-900">{user?.firstName} {user?.lastName}</p>
-            <p className="text-sm text-gray-500">{user?.email}</p>
+        <div className="absolute right-0 mt-3 w-56 bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl shadow-2xl border border-blue-400/30 py-2 z-50 backdrop-blur-xl">
+          <div className="px-5 py-4 border-b border-blue-400/20 bg-gradient-to-r from-blue-500/10 to-cyan-500/10">
+            <p className="font-bold text-white text-lg">{user?.firstName} {user?.lastName}</p>
+            <p className="text-sm text-cyan-300 font-medium">{user?.email}</p>
           </div>
           
           <Link
             to={ROUTES.PROFILE}
             onClick={() => setIsOpen(false)}
-            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+            className="block px-5 py-3 text-white hover:bg-blue-500/20 transition-all duration-200 font-semibold flex items-center space-x-2 group"
           >
-            Profile Settings
+            <span>⚙️</span>
+            <span>Profile Settings</span>
+            <span className="ml-auto text-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity">→</span>
           </Link>
           
           <Link
             to={ROUTES.DASHBOARD}
             onClick={() => setIsOpen(false)}
-            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+            className="block px-5 py-3 text-white hover:bg-blue-500/20 transition-all duration-200 font-semibold flex items-center space-x-2 group"
           >
-            Dashboard
+            <span>📊</span>
+            <span>Dashboard</span>
+            <span className="ml-auto text-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity">→</span>
           </Link>
           
-          <hr className="my-2" />
+          <hr className="my-2 border-blue-400/20" />
           
           <button
             onClick={() => {
               setIsOpen(false)
               onLogout()
             }}
-            className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+            className="block w-full text-left px-5 py-3 text-red-400 hover:bg-red-500/20 transition-all duration-200 font-semibold flex items-center space-x-2 group"
           >
-            Sign Out
+            <span>🚪</span>
+            <span>Sign Out</span>
+            <span className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">→</span>
           </button>
         </div>
       )}

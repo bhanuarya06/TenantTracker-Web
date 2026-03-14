@@ -34,71 +34,69 @@ export const Header = () => {
 
   return (
     <>
-      <header className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-200">
+      <header className="sticky top-0 z-50 bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 shadow-2xl border-b border-blue-500/30 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex justify-between items-center h-24">
             {/* Logo */}
             <Link
               to={ROUTES.HOME}
-              className="flex items-center space-x-2 text-2xl font-bold text-gray-900 hover:text-blue-600 transition-colors"
+              className="flex items-center space-x-3 text-3xl font-black text-transparent bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text hover:from-blue-300 hover:to-cyan-200 transition-all duration-300 transform hover:scale-110"
             >
-              <span>🏠</span>
+              <span className="text-4xl">🏠</span>
               <span>TenantTracker</span>
             </Link>
 
             {/* Navigation - Desktop */}
-            <nav className="hidden md:flex items-center space-x-8">
-              <Link
-                to={ROUTES.HOME}
-                className="text-gray-600 hover:text-gray-900 transition-colors"
-              >
-                Home
-              </Link>
+            <nav className="hidden lg:flex items-center space-x-24">
               {isAuthenticated && (
                 <>
                   <Link
                     to={ROUTES.DASHBOARD}
-                    className="text-gray-600 hover:text-gray-900 transition-colors"
+                    className="relative text-white font-semibold text-lg group hover:text-cyan-300 transition-all duration-300 flex flex-col items-center"
                   >
-                    Dashboard
+                    <span>📊 Dashboard</span>
+                    <span className="absolute bottom-0 left-0 w-0 h-1 bg-gradient-to-r from-blue-400 to-cyan-300 group-hover:w-full transition-all duration-300 rounded-full"></span>
                   </Link>
                   {userType === USER_TYPES.OWNER && (
                     <Link
                       to={ROUTES.PROPERTIES}
-                      className="text-gray-600 hover:text-gray-900 transition-colors"
+                      className="relative text-white font-semibold text-lg group hover:text-cyan-300 transition-all duration-300 flex flex-col items-center"
                     >
-                      Properties
+                      <span>🏢 Properties</span>
+                      <span className="absolute bottom-0 left-0 w-0 h-1 bg-gradient-to-r from-blue-400 to-cyan-300 group-hover:w-full transition-all duration-300 rounded-full"></span>
                     </Link>
                   )}
                 </>
               )}
               <Link
                 to={ROUTES.CONTACT}
-                className="text-gray-600 hover:text-gray-900 transition-colors"
+                className="relative text-white font-semibold text-lg group hover:text-cyan-300 transition-all duration-300 flex flex-col items-center"
               >
-                Contact
+                <span>📞 Contact</span>
+                <span className="absolute bottom-0 left-0 w-0 h-1 bg-gradient-to-r from-blue-400 to-cyan-300 group-hover:w-full transition-all duration-300 rounded-full"></span>
               </Link>
             </nav>
 
             {/* User Actions */}
-            <div className="hidden md:flex items-center space-x-4">
+            <div className="hidden md:flex items-center space-x-6">
               {isAuthenticated ? (
                 <div className="flex items-center space-x-4">
-                  <span className="text-sm text-gray-600">
-                    Welcome, {user?.firstName}
+                  <span className="text-sm font-semibold text-transparent bg-gradient-to-r from-blue-300 to-cyan-200 bg-clip-text">
+                    Welcome, {user?.firstName} 👋
                   </span>
+                  <div className="w-px h-8 bg-gradient-to-b from-blue-400 to-cyan-300"></div>
                   <UserDropdown user={user} onLogout={handleLogout} />
                 </div>
               ) : (
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-4">
                   {/* User Type Selector */}
                   <select
                     value={userType}
                     onChange={(e) => handleUserTypeChange(e.target.value)}
-                    className="text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="text-sm font-semibold border border-blue-400/50 bg-slate-800 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all duration-300 hover:border-cyan-400"
                   >
-                    <option value={USER_TYPES.OWNER}>Owner</option>
-                    <option value={USER_TYPES.TENANT}>Tenant</option>
+                    <option value={USER_TYPES.OWNER}>👨 Owner</option>
+                    <option value={USER_TYPES.TENANT}>👤 Tenant</option>
                   </select>
                   
                   <Button
