@@ -1,110 +1,118 @@
-import { useState, useEffect } from 'react'
-import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { useSelector, useDispatch } from 'react-redux'
-import { selectIsAuthenticated, selectUserType, setUserType } from '../../store/slices/authSlice'
-import { useAuth } from '../../hooks/useAuth'
-import { Button } from '../../components/ui/Button'
-import { LoadingSpinner } from '../../components/ui/LoadingSpinner'
-import { ROUTES, USER_TYPES, FORM_VALIDATION } from '../../config/constants'
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  selectIsAuthenticated,
+  selectUserType,
+  setUserType,
+} from "../../store/slices/authSlice";
+import { useAuth } from "../../hooks/useAuth";
+import { Button } from "../../components/ui/Button";
+import { LoadingSpinner } from "../../components/ui/LoadingSpinner";
+import { ROUTES, USER_TYPES, FORM_VALIDATION } from "../../config/constants";
 
 export const LoginPage = () => {
-  const navigate = useNavigate()
-  const location = useLocation()
-  const dispatch = useDispatch()
-  const isAuthenticated = useSelector(selectIsAuthenticated)
-  const userType = useSelector(selectUserType)
-  const { login, isLoading } = useAuth()
+  const navigate = useNavigate();
+  const location = useLocation();
+  const dispatch = useDispatch();
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const userType = useSelector(selectUserType);
+  const { login, isLoading } = useAuth();
 
   const [formData, setFormData] = useState({
-    email: 'chandra@gmail.com', // Default for testing
-    password: 'Chandra@123', // Default for testing
-  })
-  const [errors, setErrors] = useState({})
+    email: "vadinapally.chandra90@gmail.com", // Default for testing
+    password: "Bhanu@28", // Default for testing
+  });
+  const [errors, setErrors] = useState({});
 
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      const from = location.state?.from || ROUTES.DASHBOARD
-      navigate(from, { replace: true })
+      const from = location.state?.from || ROUTES.DASHBOARD;
+      navigate(from, { replace: true });
     }
-  }, [isAuthenticated, navigate, location])
+  }, [isAuthenticated, navigate, location]);
 
   const validateForm = () => {
-    const newErrors = {}
+    const newErrors = {};
 
     if (!formData.email) {
-      newErrors.email = 'Email is required'
+      newErrors.email = "Email is required";
     } else if (!FORM_VALIDATION.EMAIL_REGEX.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email address'
+      newErrors.email = "Please enter a valid email address";
     }
 
     if (!formData.password) {
-      newErrors.password = 'Password is required'
+      newErrors.password = "Password is required";
     } else if (formData.password.length < FORM_VALIDATION.PASSWORD_MIN_LENGTH) {
-      newErrors.password = `Password must be at least ${FORM_VALIDATION.PASSWORD_MIN_LENGTH} characters`
+      newErrors.password = `Password must be at least ${FORM_VALIDATION.PASSWORD_MIN_LENGTH} characters`;
     }
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    console.log('LoginPage: Form submitted, preventing default')
-    console.log('LoginPage: Form data:', formData)
-    
+    e.preventDefault();
+    console.log("LoginPage: Form submitted, preventing default");
+    console.log("LoginPage: Form data:", formData);
+
     if (!validateForm()) {
-      console.log('LoginPage: Form validation failed')
-      return
+      console.log("LoginPage: Form validation failed");
+      return;
     }
 
     try {
-      console.log('LoginPage: Calling login with:', formData)
-      const result = await login(formData)
-      console.log('LoginPage: Login result received:', result)
-      
+      console.log("LoginPage: Calling login with:", formData);
+      const result = await login(formData);
+      console.log("LoginPage: Login result received:", result);
+
       if (result.success) {
-        console.log('LoginPage: Login result success:', result)
-        
+        console.log("LoginPage: Login result success:", result);
+
         // Implement role-based redirect as per API specification
-        const user = result.data
-        console.log('LoginPage: User data from result:', user)
-        
-        let redirectPath
-        
-        if (user.role === 'owner') {
-          redirectPath = '/dashboard' // Owner dashboard
-        } else if (user.role === 'tenant') {
-          redirectPath = '/dashboard' // Tenant dashboard (same route, different data)
+        const user = result.data;
+        console.log("LoginPage: User data from result:", user);
+
+        let redirectPath;
+
+        if (user.role === "owner") {
+          redirectPath = "/dashboard"; // Owner dashboard
+        } else if (user.role === "tenant") {
+          redirectPath = "/dashboard"; // Tenant dashboard (same route, different data)
         } else {
           // Fallback to default dashboard
-          redirectPath = location.state?.from || ROUTES.DASHBOARD
+          redirectPath = location.state?.from || ROUTES.DASHBOARD;
         }
-        
-        console.log('LoginPage: Redirecting to:', redirectPath, 'for role:', user.role)
-        
+
+        console.log(
+          "LoginPage: Redirecting to:",
+          redirectPath,
+          "for role:",
+          user.role,
+        );
+
         // Add a small delay to ensure Redux state is updated
         setTimeout(() => {
-          navigate(redirectPath, { replace: true })
-        }, 100)
-        
+          navigate(redirectPath, { replace: true });
+        }, 100);
       } else {
-        console.error('Login failed:', result.error)
+        console.error("Login failed:", result.error);
       }
     } catch (error) {
-      console.error('Login error:', error)
+      console.error("Login error:", error);
     }
-  }
+  };
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
-    
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+
     // Clear error when user starts typing
     if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }))
+      setErrors((prev) => ({ ...prev, [name]: "" }));
     }
-  }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -117,7 +125,7 @@ export const LoginPage = () => {
             Sign in to your account
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Or{' '}
+            Or{" "}
             <Link
               to={ROUTES.REGISTER}
               className="font-medium text-blue-600 hover:text-blue-500"
@@ -130,7 +138,10 @@ export const LoginPage = () => {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           {/* User Type Selector */}
           <div>
-            <label htmlFor="userType" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="userType"
+              className="block text-sm font-medium text-gray-700"
+            >
               Login as
             </label>
             <select
@@ -156,7 +167,7 @@ export const LoginPage = () => {
                 autoComplete="email"
                 required
                 className={`appearance-none rounded-none relative block w-full px-3 py-2 border ${
-                  errors.email ? 'border-red-300' : 'border-gray-300'
+                  errors.email ? "border-red-300" : "border-gray-300"
                 } placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
                 placeholder="Email address"
                 value={formData.email}
@@ -177,7 +188,7 @@ export const LoginPage = () => {
                 autoComplete="current-password"
                 required
                 className={`appearance-none rounded-none relative block w-full px-3 py-2 border ${
-                  errors.password ? 'border-red-300' : 'border-gray-300'
+                  errors.password ? "border-red-300" : "border-gray-300"
                 } placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
                 placeholder="Password"
                 value={formData.password}
@@ -191,7 +202,10 @@ export const LoginPage = () => {
 
           <div className="flex items-center justify-between">
             <div className="text-sm">
-              <a href="#" className="font-medium text-blue-600 hover:text-blue-500">
+              <a
+                href="#"
+                className="font-medium text-blue-600 hover:text-blue-500"
+              >
                 Forgot your password?
               </a>
             </div>
@@ -204,13 +218,13 @@ export const LoginPage = () => {
               disabled={isLoading}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
-              {isLoading ? <LoadingSpinner size="sm" /> : 'Sign in'}
+              {isLoading ? <LoadingSpinner size="sm" /> : "Sign in"}
             </Button>
           </div>
 
           <div className="text-center">
             <span className="text-sm text-gray-600">
-              Don't have an account?{' '}
+              Don't have an account?{" "}
               <Link
                 to={ROUTES.REGISTER}
                 className="font-medium text-blue-600 hover:text-blue-500"
@@ -222,5 +236,5 @@ export const LoginPage = () => {
         </form>
       </div>
     </div>
-  )
-}
+  );
+};
