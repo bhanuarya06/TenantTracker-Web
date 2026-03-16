@@ -7,6 +7,11 @@ export const tenantService = {
     return response.data;
   },
 
+  async getTenantById(tenantId) {
+    const response = await apiClient.get(API_ENDPOINTS.GET_TENANT(tenantId));
+    return response.data;
+  },
+
   async addTenant(tenantData) {
     const response = await apiClient.post(API_ENDPOINTS.ADD_TENANT, tenantData);
     return response.data;

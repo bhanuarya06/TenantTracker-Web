@@ -1,15 +1,64 @@
+import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 import { selectUser } from '../../store/slices/authSlice'
 import { Button } from '../../components/ui/Button'
+import { LoadingSpinner } from '../../components/ui/LoadingSpinner'
 import { ROUTES } from '../../config/constants'
+import { dashboardService } from '../../services/dashboardService'
+import toast from 'react-hot-toast'
 
 export const DashboardPage = () => {
   const user = useSelector(selectUser)
+  const [dashboard, setDashboard] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
   // Determine user role from unified User model (role: 'owner' | 'tenant' | 'admin')
   const isOwner = user?.role === 'owner'
   const isTenant = user?.role === 'tenant'
+
+  useEffect(() => {
+    loadDashboard()
+  }, [])
+
+  const loadDashboard = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      const response = await dashboardService.getDashboard()
+      console.log('Dashboard data:', response)
+      setDashboard(response.data?.dashboard)
+    } catch (err) {
+      console.error('Failed to load dashboard:', err)
+      setError(err.message || 'Failed to load dashboard')
+      toast.error('Failed to load dashboard')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner size="lg" />
+      </div>
+    )
+  }
+
+  if (error && !dashboard) {
+    return (
+      <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 via-white to-gray-50">
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+            <h2 className="text-lg font-bold text-red-800 mb-2">Failed to Load Dashboard</h2>
+            <p className="text-red-700 mb-4">{error}</p>
+            <Button onClick={loadDashboard}>Try Again</Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   console.log('Dashboard - User role:', user?.role, 'isOwner:', isOwner, 'isTenant:', isTenant)
 
@@ -34,68 +83,70 @@ export const DashboardPage = () => {
 
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-          {isOwner ? (
+          {isOwner && dashboard?.summary ? (
             <>
               <StatsCard
                 title="Total Properties"
-                value="12"
+                value={dashboard.summary.totalProperties}
                 icon="🏠"
-                trend="+2 this month"
+                trend={`${dashboard.summary.totalProperties} properties`}
                 trendUp={true}
               />
               <StatsCard
                 title="Active Tenants"
-                value="28"
+                value={dashboard.summary.activeTenants}
                 icon="👥"
-                trend="+5 this month"
+                trend={`${dashboard.summary.activeTenants} of ${dashboard.summary.totalTenants} tenants`}
                 trendUp={true}
               />
               <StatsCard
                 title="Monthly Revenue"
-                value="$45,200"
+                value={`$${(dashboard.financial?.monthlyRevenue || 0).toLocaleString()}`}
                 icon="💰"
-                trend="+8% from last month"
+                trend={`Total: $${(dashboard.financial?.totalRevenue || 0).toLocaleString()}`}
                 trendUp={true}
               />
               <StatsCard
-                title="Maintenance Requests"
-                value="3"
-                icon="🔧"
-                trend="2 pending"
+                title="Outstanding Amount"
+                value={`$${(dashboard.financial?.outstandingAmount || 0).toLocaleString()}`}
+                icon="⚠️"
+                trend={`${dashboard.alerts?.overdueBills || 0} overdue bills`}
                 trendUp={false}
               />
             </>
-          ) : (
+          ) : isTenant && dashboard?.financial ? (
             <>
               <StatsCard
-                title="Current Rent"
-                value="$1,800"
+                title="Monthly Rent"
+                value={`$${(dashboard.financial?.monthlyRent || 0).toLocaleString()}`}
                 icon="💵"
-                trend="Due in 5 days"
-                trendUp={false}
+                trend={dashboard.lease?.daysUntilExpiry ? `Expires in ${dashboard.lease.daysUntilExpiry} days` : 'Active lease'}
+                trendUp={true}
+              />
+              <StatsCard
+                title="Outstanding Amount"
+                value={`$${(dashboard.financial?.outstandingAmount || 0).toLocaleString()}`}
+                icon="💳"
+                trend={dashboard.financial?.nextPaymentDue ? `Due: ${new Date(dashboard.financial.nextPaymentDue).toLocaleDateString()}` : 'No pending bills'}
+                trendUp={dashboard.financial?.outstandingAmount === 0}
               />
               <StatsCard
                 title="Lease Duration"
-                value="12 months"
+                value={`${dashboard.lease?.daysUntilExpiry || 0} days`}
                 icon="📅"
-                trend="Expires Dec 2025"
+                trend={`Expires: ${dashboard.lease?.endDate ? new Date(dashboard.lease.endDate).toLocaleDateString() : 'N/A'}`}
                 trendUp={true}
               />
               <StatsCard
-                title="Maintenance"
-                value="1"
-                icon="🔧"
-                trend="Request pending"
-                trendUp={false}
-              />
-              <StatsCard
-                title="Property Rating"
-                value="4.8/5"
-                icon="⭐"
-                trend="Great location"
+                title="Security Deposit"
+                value={`$${(dashboard.financial?.securityDeposit || 0).toLocaleString()}`}
+                icon="🏦"
+                trend="Held by landlord"
                 trendUp={true}
               />
             </>
+          ) : (
+            <div className="col-span-full text-center text-gray-500">Loading stats...</div>
           )}
         </div>
 
@@ -175,54 +226,78 @@ export const DashboardPage = () => {
                 <span>Recent Activity</span>
               </h2>
               <div className="space-y-3">
-                {isOwner ? (
+                {isOwner && dashboard?.recentActivity ? (
                   <>
-                    <ActivityItem
-                      title="New tenant application received"
-                      description="John Smith applied for Unit 204"
-                      time="2 hours ago"
-                      type="info"
-                    />
-                    <ActivityItem
-                      title="Maintenance request completed"
-                      description="Fixed leaky faucet in Unit 102"
-                      time="1 day ago"
-                      type="success"
-                    />
-                    <ActivityItem
-                      title="Rent payment received"
-                      description="Sarah Johnson paid rent for November"
-                      time="2 days ago"
-                      type="success"
-                    />
-                    <ActivityItem
-                      title="Property inspection scheduled"
-                      description="Annual inspection for Building A"
-                      time="3 days ago"
-                      type="warning"
-                    />
+                    {dashboard.recentActivity.tenants && dashboard.recentActivity.tenants.length > 0 ? (
+                      dashboard.recentActivity.tenants.map((tenant, idx) => (
+                        <ActivityItem
+                          key={idx}
+                          title={`New tenant added: ${tenant.user?.firstName} ${tenant.user?.lastName}`}
+                          description={`Added to ${tenant.property?.name}`}
+                          time={new Date(tenant.createdAt).toLocaleDateString()}
+                          type="info"
+                        />
+                      ))
+                    ) : null}
+                    {dashboard.recentActivity.payments && dashboard.recentActivity.payments.length > 0 ? (
+                      dashboard.recentActivity.payments.slice(0, 2).map((payment, idx) => (
+                        <ActivityItem
+                          key={`payment-${idx}`}
+                          title="Rent payment received"
+                          description={`Payment of $${payment.amount || 0} received`}
+                          time={new Date(payment.createdAt).toLocaleDateString()}
+                          type="success"
+                        />
+                      ))
+                    ) : null}
+                    {dashboard.recentActivity.bills && dashboard.recentActivity.bills.length > 0 ? (
+                      dashboard.recentActivity.bills.slice(0, 1).map((bill, idx) => (
+                        <ActivityItem
+                          key={`bill-${idx}`}
+                          title="Bill generated"
+                          description={`Bill of $${bill.totalAmount || 0} for unit ${bill.tenant?.unit}`}
+                          time={new Date(bill.createdAt).toLocaleDateString()}
+                          type="info"
+                        />
+                      ))
+                    ) : null}
+                    {(!dashboard.recentActivity.tenants || dashboard.recentActivity.tenants.length === 0) && 
+                     (!dashboard.recentActivity.payments || dashboard.recentActivity.payments.length === 0) && 
+                     (!dashboard.recentActivity.bills || dashboard.recentActivity.bills.length === 0) ? (
+                      <div className="text-center text-gray-500 py-8">No recent activity yet</div>
+                    ) : null}
+                  </>
+                ) : isTenant && dashboard?.recentActivity ? (
+                  <>
+                    {dashboard.recentActivity.upcomingBills && dashboard.recentActivity.upcomingBills.length > 0 ? (
+                      dashboard.recentActivity.upcomingBills.map((bill, idx) => (
+                        <ActivityItem
+                          key={idx}
+                          title="Bill due"
+                          description={`Bill of $${bill.totalAmount || 0} due on ${new Date(bill.dueDate).toLocaleDateString()}`}
+                          time={new Date(bill.dueDate).toLocaleDateString()}
+                          type="warning"
+                        />
+                      ))
+                    ) : null}
+                    {dashboard.recentActivity.payments && dashboard.recentActivity.payments.length > 0 ? (
+                      dashboard.recentActivity.payments.map((payment, idx) => (
+                        <ActivityItem
+                          key={`payment-${idx}`}
+                          title="Payment processed"
+                          description={`Payment of $${payment.amount || 0} completed`}
+                          time={new Date(payment.createdAt).toLocaleDateString()}
+                          type="success"
+                        />
+                      ))
+                    ) : null}
+                    {(!dashboard.recentActivity.upcomingBills || dashboard.recentActivity.upcomingBills.length === 0) &&
+                     (!dashboard.recentActivity.payments || dashboard.recentActivity.payments.length === 0) ? (
+                      <div className="text-center text-gray-500 py-8">No recent activity</div>
+                    ) : null}
                   </>
                 ) : (
-                  <>
-                    <ActivityItem
-                      title="Rent payment processed"
-                      description="Your November rent payment was successful"
-                      time="5 days ago"
-                      type="success"
-                    />
-                    <ActivityItem
-                      title="Maintenance update"
-                      description="Your AC repair has been scheduled"
-                      time="1 week ago"
-                      type="info"
-                    />
-                    <ActivityItem
-                      title="Lease renewal notice"
-                      description="Your lease renewal options are available"
-                      time="2 weeks ago"
-                      type="warning"
-                    />
-                  </>
+                  <div className="text-center text-gray-500 py-8">Loading activities...</div>
                 )}
               </div>
             </div>
@@ -253,45 +328,96 @@ export const DashboardPage = () => {
             </div>
 
             {/* Properties Overview (Owner only) */}
-            {isOwner && (
+            {isOwner && dashboard?.summary ? (
               <div className="bg-white rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 p-8 border border-gray-100">
                 <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center space-x-2">
                   <span>🏢</span>
                   <span>Properties Overview</span>
                 </h3>
                 <div className="space-y-4">
-                  <PropertyItem name="Sunset Apartments" units="24 units" occupancy="92%" />
-                  <PropertyItem name="Downtown Condos" units="12 units" occupancy="100%" />
-                  <PropertyItem name="Garden View Complex" units="36 units" occupancy="86%" />
+                  <div className="p-4 bg-gradient-to-r from-blue-50 to-transparent rounded-xl border border-blue-100">
+                    <p className="text-sm text-gray-600 font-medium">Total Properties</p>
+                    <p className="text-2xl font-bold text-gray-900 mt-1">{dashboard.summary.totalProperties}</p>
+                  </div>
+                  <div className="p-4 bg-gradient-to-r from-green-50 to-transparent rounded-xl border border-green-100">
+                    <p className="text-sm text-gray-600 font-medium">Occupancy Rate</p>
+                    <p className="text-2xl font-bold text-gray-900 mt-1">
+                      {dashboard.summary.totalTenants > 0 
+                        ? Math.round(((dashboard.summary.activeTenants / dashboard.summary.totalTenants) * 100)) 
+                        : 0}%
+                    </p>
+                  </div>
+                  <div className="p-4 bg-gradient-to-r from-orange-50 to-transparent rounded-xl border border-orange-100">
+                    <p className="text-sm text-gray-600 font-medium">Vacant Units</p>
+                    <p className="text-2xl font-bold text-gray-900 mt-1">{dashboard.summary.totalTenants - dashboard.summary.activeTenants}</p>
+                  </div>
                 </div>
-                <Button variant="outline" className="w-full mt-4">
-                  View All Properties
-                </Button>
+                <Link to={ROUTES.PROPERTIES}>
+                  <Button variant="outline" className="w-full mt-4">
+                    View All Properties
+                  </Button>
+                </Link>
               </div>
-            )}
+            ) : null}
 
             {/* Notifications */}
             <div className="bg-white rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 p-8 border border-gray-100">
               <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center space-x-2">
                 <span>🔔</span>
-                <span>Notifications</span>
+                <span>Alerts & Notifications</span>
               </h3>
               <div className="space-y-3">
-                <NotificationItem
-                  message={isOwner ? "Rent due reminder for 3 tenants" : "Rent payment due in 5 days"}
-                  time="Today"
-                  unread={true}
-                />
-                <NotificationItem
-                  message={isOwner ? "New maintenance request submitted" : "Maintenance update available"}
-                  time="Yesterday"
-                  unread={false}
-                />
-                <NotificationItem
-                  message={isOwner ? "Property insurance renewal due" : "Monthly newsletter available"}
-                  time="2 days ago"
-                  unread={false}
-                />
+                {isOwner && dashboard?.alerts ? (
+                  <>
+                    {dashboard.alerts.overdueBills > 0 ? (
+                      <NotificationItem
+                        message={`${dashboard.alerts.overdueBills} overdue bills waiting for payment`}
+                        time="Urgent"
+                        unread={true}
+                      />
+                    ) : null}
+                    {dashboard.alerts.expiringLeases > 0 ? (
+                      <NotificationItem
+                        message={`${dashboard.alerts.expiringLeases} leases expiring within 30 days`}
+                        time="This month"
+                        unread={true}
+                      />
+                    ) : null}
+                    {dashboard.alerts.overdueBills === 0 && dashboard.alerts.expiringLeases === 0 ? (
+                      <NotificationItem
+                        message="All systems operating normally"
+                        time="Now"
+                        unread={false}
+                      />
+                    ) : null}
+                  </>
+                ) : isTenant && dashboard?.financial ? (
+                  <>
+                    {dashboard.financial.nextPaymentDue ? (
+                      <NotificationItem
+                        message={`Rent payment due on ${new Date(dashboard.financial.nextPaymentDue).toLocaleDateString()}`}
+                        time={`in ${Math.ceil((new Date(dashboard.financial.nextPaymentDue) - new Date()) / (1000 * 60 * 60 * 24))} days`}
+                        unread={true}
+                      />
+                    ) : null}
+                    {dashboard.lease?.daysUntilExpiry && dashboard.lease.daysUntilExpiry < 90 ? (
+                      <NotificationItem
+                        message={`Your lease expires in ${dashboard.lease.daysUntilExpiry} days`}
+                        time="Upcoming"
+                        unread={true}
+                      />
+                    ) : null}
+                    {!dashboard.financial.nextPaymentDue && (!dashboard.lease?.daysUntilExpiry || dashboard.lease.daysUntilExpiry >= 90) ? (
+                      <NotificationItem
+                        message="No urgent notifications"
+                        time="Now"
+                        unread={false}
+                      />
+                    ) : null}
+                  </>
+                ) : (
+                  <div className="text-center text-gray-500 py-8">Loading notifications...</div>
+                )}
               </div>
             </div>
           </div>
@@ -337,10 +463,10 @@ const ActionCard = ({ title, description, icon, to }) => (
 
 const ActivityItem = ({ title, description, time, type }) => {
   const typeMap = {
-    success: { bg: 'bg-green-100', text: 'text-green-800', dot: 'bg-green-500', icon: '✓' },
-    info: { bg: 'bg-blue-100', text: 'text-blue-800', dot: 'bg-blue-500', icon: 'ℹ' },
+    success: { bg: 'bg-green-100', text: 'text-green-800', dot: 'bg-green-500', icon: '+' },
+    info: { bg: 'bg-blue-100', text: 'text-blue-800', dot: 'bg-blue-500', icon: 'i' },
     warning: { bg: 'bg-orange-100', text: 'text-orange-800', dot: 'bg-orange-500', icon: '!' },
-    error: { bg: 'bg-red-100', text: 'text-red-800', dot: 'bg-red-500', icon: '✕' },
+    error: { bg: 'bg-red-100', text: 'text-red-800', dot: 'bg-red-500', icon: 'x' },
   }
 
   const colors = typeMap[type] || typeMap.info

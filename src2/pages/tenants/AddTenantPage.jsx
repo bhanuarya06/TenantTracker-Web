@@ -328,6 +328,14 @@ const AddTenantPage = () => {
       setLocalLoading(true)
       dispatch(setLoading(true))
       
+      // Strip empty string fields from occupants and emergency contacts
+      const cleanOccupants = formData.occupants.map(o =>
+        Object.fromEntries(Object.entries(o).filter(([, v]) => v !== ''))
+      )
+      const cleanEmergencyContacts = formData.emergencyContacts.map(c =>
+        Object.fromEntries(Object.entries(c).filter(([, v]) => v !== ''))
+      )
+
       if (isEditMode) {
         // For edit mode, send tenant-specific fields and user updates separately
         const payload = {
@@ -348,8 +356,8 @@ const AddTenantPage = () => {
             securityDeposit: parseFloat(formData.leaseDetails.securityDeposit || 0),
             leaseType: formData.leaseDetails.leaseType
           },
-          occupants: formData.occupants,
-          emergencyContacts: formData.emergencyContacts,
+          occupants: cleanOccupants,
+          emergencyContacts: cleanEmergencyContacts,
           preferences: formData.preferences,
           status: formData.status
         }
@@ -385,8 +393,8 @@ const AddTenantPage = () => {
             securityDeposit: parseFloat(formData.leaseDetails.securityDeposit || 0),
             leaseType: formData.leaseDetails.leaseType
           },
-          occupants: formData.occupants,
-          emergencyContacts: formData.emergencyContacts,
+          occupants: cleanOccupants,
+          emergencyContacts: cleanEmergencyContacts,
           preferences: formData.preferences,
           status: formData.status
         }

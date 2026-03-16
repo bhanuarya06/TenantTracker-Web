@@ -107,15 +107,15 @@ export const ContactPage = () => {
                 <ContactInfo
                   icon="📞"
                   title="Phone"
-                  content="+1 (555) 123-4567"
+                  content="+91 9441459266"
                   description="Call us Monday to Friday, 9AM to 6PM EST"
                 />
                 
                 <ContactInfo
                   icon="📍"
                   title="Office"
-                  content="123 Business Ave, Suite 100"
-                  description="New York, NY 10001"
+                  content="Yada Mitra Nagar Colony, Bandlaguda Jagir"
+                  description="Hyderabad, Telangana 500086"
                 />
                 
                 <ContactInfo

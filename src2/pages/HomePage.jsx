@@ -32,14 +32,14 @@ export const HomePage = () => {
               <div className="flex flex-col sm:flex-row gap-6 pt-4">
                 {isAuthenticated ? (
                   <Link to={ROUTES.DASHBOARD}>
-                    <Button size="lg" className="bg-white text-blue-600 hover:bg-blue-50">
+                    <Button size="lg" className="bg-gray-950  text-blue-600 hover:bg-blue-50">
                       Go to Dashboard
                     </Button>
                   </Link>
                 ) : (
                   <>
                     <Link to={ROUTES.REGISTER}>
-                      <Button size="lg" className="bg-white text-blue-600 hover:bg-blue-50 font-bold shadow-lg hover:shadow-xl transition-all hover:scale-105">
+                      <Button size="lg" className="bg-gray-950 text-gray-500 hover:bg-blue-50 font-bold shadow-lg hover:shadow-xl transition-all hover:scale-105">
                         Get Started Free →
                       </Button>
                     </Link>

@@ -10,6 +10,7 @@ export const ROUTES = {
   TENANTS: '/tenants',
   ADDTENANT: '/addtenant',
   EDITTENANT: (id) => `/edittenant/${id}`,
+  TENANT_PROFILE: (id) => `/tenant/${id}`,
   RENT_HISTORY: '/rent-history',
   ADD_BILL: (id) => `/add-bill/${id}`,
   CONTACT: '/contact',

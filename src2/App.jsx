@@ -11,6 +11,7 @@ import PropertiesPage from './pages/properties/PropertiesPage'
 import AddPropertyPage from './pages/properties/AddPropertyPage'
 import TenantsPage from './pages/tenants/TenantsPage'
 import AddTenantPage from './pages/tenants/AddTenantPage'
+import TenantProfilePage from './pages/tenants/TenantProfilePage'
 import RentHistoryPage from './pages/tenants/RentHistoryPage'
 import AddBillPage from './pages/tenants/AddBillPage'
 import { ContactPage } from './pages/ContactPage'
@@ -34,6 +35,7 @@ function App() {
             <Route path="add-property" element={<AddPropertyPage />} />
             <Route path="edit-property/:id" element={<AddPropertyPage />} />
             <Route path="tenants" element={<TenantsPage />} />
+            <Route path="tenant/:id" element={<TenantProfilePage />} />
             <Route path="addtenant" element={<AddTenantPage />} />
             <Route path="edittenant/:id" element={<AddTenantPage />} />
             <Route path="rent-history" element={<RentHistoryPage />} />
@@ -47,7 +49,7 @@ function App() {
       <Toaster
         position="top-right"
         toastOptions={{
-          duration: 3000,
+          duration: 900,
           style: {
             background: '#363636',
             color: '#fff',

@@ -63,6 +63,7 @@ const PropertiesPage = () => {
         properties: propertiesData,
         pagination: response.data?.pagination || response.pagination || null
       }))
+      dispatch(setLoading(false))
       toast.success(`Loaded ${propertiesData.length} properties`)
     } catch (error) {
       console.error('Load properties error:', error)
