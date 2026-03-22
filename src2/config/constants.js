@@ -1,41 +1,42 @@
 export const ROUTES = {
-  HOME: '/',
-  LOGIN: '/login',
-  REGISTER: '/register',
-  DASHBOARD: '/dashboard',
-  PROFILE: '/profile',
-  PROPERTIES: '/properties',
-  ADD_PROPERTY: '/add-property',
+  HOME: "/",
+  LOGIN: "/login",
+  REGISTER: "/register",
+  OAUTH_CALLBACK: (provider) => `/auth/callback/${provider}`,
+  DASHBOARD: "/dashboard",
+  PROFILE: "/profile",
+  PROPERTIES: "/properties",
+  ADD_PROPERTY: "/add-property",
   EDIT_PROPERTY: (id) => `/edit-property/${id}`,
-  TENANTS: '/tenants',
-  ADDTENANT: '/addtenant',
+  TENANTS: "/tenants",
+  ADDTENANT: "/addtenant",
   EDITTENANT: (id) => `/edittenant/${id}`,
   TENANT_PROFILE: (id) => `/tenant/${id}`,
-  RENT_HISTORY: '/rent-history',
+  RENT_HISTORY: "/rent-history",
   ADD_BILL: (id) => `/add-bill/${id}`,
-  CONTACT: '/contact',
-}
+  CONTACT: "/contact",
+};
 
 export const USER_TYPES = {
-  OWNER: 'owner',
-  TENANT: 'tenant',
-}
+  OWNER: "owner",
+  TENANT: "tenant",
+};
 
 export const FORM_VALIDATION = {
   EMAIL_REGEX: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
   PASSWORD_MIN_LENGTH: 8,
   PHONE_REGEX: /^\+?[\d\s-()]+$/,
-}
+};
 
 export const UI_CONSTANTS = {
   SIDEBAR_WIDTH: 256,
   HEADER_HEIGHT: 64,
   MOBILE_BREAKPOINT: 768,
-}
+};
 
 export const TOAST_TYPES = {
-  SUCCESS: 'success',
-  ERROR: 'error',
-  INFO: 'info',
-  WARNING: 'warning',
-}
+  SUCCESS: "success",
+  ERROR: "error",
+  INFO: "info",
+  WARNING: "warning",
+};

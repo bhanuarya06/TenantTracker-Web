@@ -1,98 +1,103 @@
-import { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { useSelector, useDispatch } from 'react-redux'
-import { selectIsAuthenticated, selectUserType, setUserType } from '../../store/slices/authSlice'
-import { useAuth } from '../../hooks/useAuth'
-import { Button } from '../../components/ui/Button'
-import { LoadingSpinner } from '../../components/ui/LoadingSpinner'
-import { ROUTES, USER_TYPES, FORM_VALIDATION } from '../../config/constants'
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  selectIsAuthenticated,
+  selectUserType,
+  setUserType,
+} from "../../store/slices/authSlice";
+import { useAuth } from "../../hooks/useAuth";
+import { Button } from "../../components/ui/Button";
+import { LoadingSpinner } from "../../components/ui/LoadingSpinner";
+import { SocialLoginButtons } from "../../components/auth/SocialLoginButtons";
+import { ROUTES, USER_TYPES, FORM_VALIDATION } from "../../config/constants";
 
 export const RegisterPage = () => {
-  const navigate = useNavigate()
-  const dispatch = useDispatch()
-  const isAuthenticated = useSelector(selectIsAuthenticated)
-  const userType = useSelector(selectUserType)
-  const { register, isLoading } = useAuth()
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const userType = useSelector(selectUserType);
+  const { register, isLoading } = useAuth();
 
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    dob: '',
-    gender: '',
-    mobile: '',
-    bio: '',
-  })
-  const [errors, setErrors] = useState({})
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    dob: "",
+    gender: "",
+    mobile: "",
+    bio: "",
+  });
+  const [errors, setErrors] = useState({});
 
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      navigate(ROUTES.DASHBOARD, { replace: true })
+      navigate(ROUTES.DASHBOARD, { replace: true });
     }
-  }, [isAuthenticated, navigate])
+  }, [isAuthenticated, navigate]);
 
   const validateForm = () => {
-    const newErrors = {}
+    const newErrors = {};
 
     if (!formData.firstName.trim()) {
-      newErrors.firstName = 'First name is required'
+      newErrors.firstName = "First name is required";
     }
 
     if (!formData.lastName.trim()) {
-      newErrors.lastName = 'Last name is required'
+      newErrors.lastName = "Last name is required";
     }
 
     if (!formData.email) {
-      newErrors.email = 'Email is required'
+      newErrors.email = "Email is required";
     } else if (!FORM_VALIDATION.EMAIL_REGEX.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email address'
+      newErrors.email = "Please enter a valid email address";
     }
 
     if (!formData.password) {
-      newErrors.password = 'Password is required'
+      newErrors.password = "Password is required";
     } else if (formData.password.length < FORM_VALIDATION.PASSWORD_MIN_LENGTH) {
-      newErrors.password = `Password must be at least ${FORM_VALIDATION.PASSWORD_MIN_LENGTH} characters`
+      newErrors.password = `Password must be at least ${FORM_VALIDATION.PASSWORD_MIN_LENGTH} characters`;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match'
+      newErrors.confirmPassword = "Passwords do not match";
     }
 
     if (formData.mobile && !FORM_VALIDATION.PHONE_REGEX.test(formData.mobile)) {
-      newErrors.mobile = 'Please enter a valid phone number'
+      newErrors.mobile = "Please enter a valid phone number";
     }
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    
-    if (!validateForm()) return
+    e.preventDefault();
+
+    if (!validateForm()) return;
 
     // Remove confirmPassword from submission data
-    const { confirmPassword, ...submitData } = formData
-    
-    const result = await register(submitData)
-    
+    const { confirmPassword, ...submitData } = formData;
+
+    const result = await register(submitData);
+
     if (result.success) {
-      navigate(ROUTES.DASHBOARD, { replace: true })
+      navigate(ROUTES.DASHBOARD, { replace: true });
     }
-  }
+  };
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
-    
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+
     // Clear error when user starts typing
     if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }))
+      setErrors((prev) => ({ ...prev, [name]: "" }));
     }
-  }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -105,7 +110,7 @@ export const RegisterPage = () => {
             Create your account
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Or{' '}
+            Or{" "}
             <Link
               to={ROUTES.LOGIN}
               className="font-medium text-blue-600 hover:text-blue-500"
@@ -118,7 +123,10 @@ export const RegisterPage = () => {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           {/* User Type Selector */}
           <div>
-            <label htmlFor="userType" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="userType"
+              className="block text-sm font-medium text-gray-700"
+            >
               Register as
             </label>
             <select
@@ -136,7 +144,10 @@ export const RegisterPage = () => {
             {/* Name Fields */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="firstName"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   First Name *
                 </label>
                 <input
@@ -145,17 +156,22 @@ export const RegisterPage = () => {
                   type="text"
                   required
                   className={`mt-1 block w-full px-3 py-2 border ${
-                    errors.firstName ? 'border-red-300' : 'border-gray-300'
+                    errors.firstName ? "border-red-300" : "border-gray-300"
                   } rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
                   value={formData.firstName}
                   onChange={handleInputChange}
                 />
                 {errors.firstName && (
-                  <p className="mt-1 text-sm text-red-600">{errors.firstName}</p>
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.firstName}
+                  </p>
                 )}
               </div>
               <div>
-                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="lastName"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Last Name *
                 </label>
                 <input
@@ -164,7 +180,7 @@ export const RegisterPage = () => {
                   type="text"
                   required
                   className={`mt-1 block w-full px-3 py-2 border ${
-                    errors.lastName ? 'border-red-300' : 'border-gray-300'
+                    errors.lastName ? "border-red-300" : "border-gray-300"
                   } rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
                   value={formData.lastName}
                   onChange={handleInputChange}
@@ -177,7 +193,10 @@ export const RegisterPage = () => {
 
             {/* Email */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Email Address *
               </label>
               <input
@@ -187,7 +206,7 @@ export const RegisterPage = () => {
                 autoComplete="email"
                 required
                 className={`mt-1 block w-full px-3 py-2 border ${
-                  errors.email ? 'border-red-300' : 'border-gray-300'
+                  errors.email ? "border-red-300" : "border-gray-300"
                 } rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
                 value={formData.email}
                 onChange={handleInputChange}
@@ -200,7 +219,10 @@ export const RegisterPage = () => {
             {/* Password Fields */}
             <div className="grid grid-cols-1 gap-4">
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Password *
                 </label>
                 <input
@@ -210,7 +232,7 @@ export const RegisterPage = () => {
                   autoComplete="new-password"
                   required
                   className={`mt-1 block w-full px-3 py-2 border ${
-                    errors.password ? 'border-red-300' : 'border-gray-300'
+                    errors.password ? "border-red-300" : "border-gray-300"
                   } rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
                   value={formData.password}
                   onChange={handleInputChange}
@@ -220,7 +242,10 @@ export const RegisterPage = () => {
                 )}
               </div>
               <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="confirmPassword"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Confirm Password *
                 </label>
                 <input
@@ -230,13 +255,17 @@ export const RegisterPage = () => {
                   autoComplete="new-password"
                   required
                   className={`mt-1 block w-full px-3 py-2 border ${
-                    errors.confirmPassword ? 'border-red-300' : 'border-gray-300'
+                    errors.confirmPassword
+                      ? "border-red-300"
+                      : "border-gray-300"
                   } rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
                 />
                 {errors.confirmPassword && (
-                  <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.confirmPassword}
+                  </p>
                 )}
               </div>
             </div>
@@ -244,7 +273,10 @@ export const RegisterPage = () => {
             {/* Optional Fields */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="dob" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="dob"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Date of Birth
                 </label>
                 <input
@@ -257,7 +289,10 @@ export const RegisterPage = () => {
                 />
               </div>
               <div>
-                <label htmlFor="gender" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="gender"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Gender
                 </label>
                 <select
@@ -276,7 +311,10 @@ export const RegisterPage = () => {
             </div>
 
             <div>
-              <label htmlFor="mobile" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="mobile"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Mobile Number
               </label>
               <input
@@ -284,7 +322,7 @@ export const RegisterPage = () => {
                 name="mobile"
                 type="tel"
                 className={`mt-1 block w-full px-3 py-2 border ${
-                  errors.mobile ? 'border-red-300' : 'border-gray-300'
+                  errors.mobile ? "border-red-300" : "border-gray-300"
                 } rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
                 value={formData.mobile}
                 onChange={handleInputChange}
@@ -295,7 +333,10 @@ export const RegisterPage = () => {
             </div>
 
             <div>
-              <label htmlFor="bio" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="bio"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Bio
               </label>
               <textarea
@@ -317,13 +358,16 @@ export const RegisterPage = () => {
               disabled={isLoading}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
-              {isLoading ? <LoadingSpinner size="sm" /> : 'Create Account'}
+              {isLoading ? <LoadingSpinner size="sm" /> : "Create Account"}
             </Button>
           </div>
 
+          {/* OAuth Social Login Buttons */}
+          <SocialLoginButtons mode="register" />
+
           <div className="text-center">
             <span className="text-sm text-gray-600">
-              Already have an account?{' '}
+              Already have an account?{" "}
               <Link
                 to={ROUTES.LOGIN}
                 className="font-medium text-blue-600 hover:text-blue-500"
@@ -335,5 +379,5 @@ export const RegisterPage = () => {
         </form>
       </div>
     </div>
-  )
-}
+  );
+};

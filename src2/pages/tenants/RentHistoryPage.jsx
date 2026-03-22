@@ -76,22 +76,29 @@ const RentHistoryPage = () => {
         },
         maintenance: billCharges.maintenance ?? 0,
       },
-      dueDate: billDetail?.data?.bill?.dueDate || '',
+      dueDate: billDetail?.data?.bill?.dueDate || "",
+      status: billDetail?.data?.bill?.status || "PENDING",
     });
   };
 
   const handleSaveBillEdit = async () => {
     try {
       setActionLoading(true);
-      const updatedBill = await billService.updateBill(selectedBill._id, editFormData);
+      const updatedBill = await billService.updateBill(
+        selectedBill._id,
+        editFormData,
+      );
       // Handle both response formats
-      const billData = updatedBill?.bill || updatedBill?.data?.bill || updatedBill;
+      const billData =
+        updatedBill?.bill || updatedBill?.data?.bill || updatedBill;
       setBillDetail({ data: { bill: billData } });
       setIsEditMode(false);
-      toast.success('Bill updated successfully');
+      toast.success("Bill updated successfully");
     } catch (error) {
-      console.error('Update bill error:', error);
-      toast.error('Failed to update bill: ' + (error.message || 'Unknown error'));
+      console.error("Update bill error:", error);
+      toast.error(
+        "Failed to update bill: " + (error.message || "Unknown error"),
+      );
     } finally {
       setActionLoading(false);
     }
@@ -101,14 +108,16 @@ const RentHistoryPage = () => {
     try {
       setActionLoading(true);
       await billService.deleteBill(selectedBill._id);
-      toast.success('Bill deleted successfully');
+      toast.success("Bill deleted successfully");
       setIsDeleteConfirming(false);
       handleCloseBillDetail();
       // Reload rent history
       loadRentHistory(selectedTenant._id);
     } catch (error) {
-      console.error('Delete bill error:', error);
-      toast.error('Failed to delete bill: ' + (error.message || 'Unknown error'));
+      console.error("Delete bill error:", error);
+      toast.error(
+        "Failed to delete bill: " + (error.message || "Unknown error"),
+      );
     } finally {
       setActionLoading(false);
     }
@@ -122,10 +131,10 @@ const RentHistoryPage = () => {
       const billData = result?.bill || result?.data?.bill || result;
       setBillDetail({ data: { bill: billData } });
       setIsSendConfirming(false);
-      toast.success('Bill sent to tenant successfully');
+      toast.success("Bill sent to tenant successfully");
     } catch (error) {
-      console.error('Send bill error:', error);
-      toast.error('Failed to send bill: ' + (error.message || 'Unknown error'));
+      console.error("Send bill error:", error);
+      toast.error("Failed to send bill: " + (error.message || "Unknown error"));
     } finally {
       setActionLoading(false);
     }
@@ -220,12 +229,12 @@ const RentHistoryPage = () => {
           <div>
             <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent mb-2">
               {selectedTenant
-                ? `${selectedTenant.user?.firstName || 'Tenant'}'s Rent History`
+                ? `${selectedTenant.user?.firstName || "Tenant"}'s Rent History`
                 : "Tenant Rent History"}
             </h1>
             <p className="text-lg text-gray-600 font-light">
               {selectedTenant
-                ? `View detailed billing and payment history for ${selectedTenant.user?.firstName || 'Tenant'} ${selectedTenant.user?.lastName || ''}`
+                ? `View detailed billing and payment history for ${selectedTenant.user?.firstName || "Tenant"} ${selectedTenant.user?.lastName || ""}`
                 : "Select a tenant to view their rental payment history"}
             </p>
           </div>
@@ -281,33 +290,45 @@ const RentHistoryPage = () => {
             <div className="bg-white rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 p-8 border border-gray-100">
               <div className="flex items-center space-x-6">
                 <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg">
-                  {selectedTenant.user?.firstName?.charAt(0)?.toUpperCase() || 'T'}
+                  {selectedTenant.user?.firstName?.charAt(0)?.toUpperCase() ||
+                    "T"}
                 </div>
                 <div className="flex-1">
                   <h3 className="text-2xl font-bold text-gray-900 mb-1">
-                    {selectedTenant.user?.firstName || 'Tenant'} {selectedTenant.user?.lastName || ''}
+                    {selectedTenant.user?.firstName || "Tenant"}{" "}
+                    {selectedTenant.user?.lastName || ""}
                   </h3>
-                  <p className="text-gray-500 text-sm mb-4">{selectedTenant.user?.email || selectedTenant.email || '-'}</p>
+                  <p className="text-gray-500 text-sm mb-4">
+                    {selectedTenant.user?.email || selectedTenant.email || "-"}
+                  </p>
                   <div className="flex flex-wrap items-center gap-6">
                     <div className="flex items-center space-x-2">
                       <span className="text-2xl">🏠</span>
                       <div>
                         <p className="text-xs text-gray-500">Room</p>
-                        <p className="font-semibold text-gray-900">{selectedTenant.user?.unit || selectedTenant.unit || '-'}</p>
+                        <p className="font-semibold text-gray-900">
+                          {selectedTenant.user?.unit ||
+                            selectedTenant.unit ||
+                            "-"}
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
                       <span className="text-2xl">💰</span>
                       <div>
                         <p className="text-xs text-gray-500">Monthly Rent</p>
-                        <p className="font-semibold text-gray-900">₹{selectedTenant.leaseDetails?.monthlyRent || 0}</p>
+                        <p className="font-semibold text-gray-900">
+                          ₹{selectedTenant.leaseDetails?.monthlyRent || 0}
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
                       <span className="text-2xl">👥</span>
                       <div>
                         <p className="text-xs text-gray-500">Members</p>
-                        <p className="font-semibold text-gray-900">{selectedTenant.occupants?.length || 1}</p>
+                        <p className="font-semibold text-gray-900">
+                          {selectedTenant.occupants?.length || 1}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -317,7 +338,9 @@ const RentHistoryPage = () => {
 
             {/* Bill Cards Grid */}
             <div className="bg-white rounded-2xl shadow-md p-8 border border-gray-100">
-              <h3 className="text-2xl font-bold text-gray-900 mb-6">Payment History</h3>
+              <h3 className="text-2xl font-bold text-gray-900 mb-6">
+                Payment History
+              </h3>
               {historyLoading ? (
                 <div className="p-12 text-center">
                   <LoadingSpinner size="md" />
@@ -326,7 +349,11 @@ const RentHistoryPage = () => {
               ) : rentHistory?.data?.bills?.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {rentHistory?.data?.bills?.map((bill, index) => (
-                    <BillCard key={bill._id || index} bill={bill} onClick={() => handleBillClick(bill)} />
+                    <BillCard
+                      key={bill._id || index}
+                      bill={bill}
+                      onClick={() => handleBillClick(bill)}
+                    />
                   ))}
                 </div>
               ) : (
@@ -344,25 +371,40 @@ const RentHistoryPage = () => {
               {/* Bill Detail Modal */}
               {selectedBill && (
                 <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 animate-fade-in">
-                  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={handleCloseBillDetail}></div>
+                  <div
+                    className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+                    onClick={handleCloseBillDetail}
+                  ></div>
                   <div className="bg-white rounded-sm shadow-2xl p-8 max-w-2xl w-full relative z-10 animate-scale-in max-h-[90vh] overflow-y-auto">
                     <button
                       className="absolute top-6 right-6 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full p-2 transition-all duration-200"
                       onClick={handleCloseBillDetail}
                       aria-label="Close modal"
                     >
-                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      <svg
+                        className="w-6 h-6"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
                       </svg>
                     </button>
                     {billDetailLoading ? (
                       <div className="flex flex-col items-center justify-center py-12">
                         <LoadingSpinner size="md" />
-                        <p className="text-gray-600 mt-4">Loading bill details...</p>
+                        <p className="text-gray-600 mt-4">
+                          Loading bill details...
+                        </p>
                       </div>
                     ) : isEditMode ? (
-                      <BillEditForm 
-                        bill={billDetail?.data?.bill} 
+                      <BillEditForm
+                        bill={billDetail?.data?.bill}
                         formData={editFormData}
                         setFormData={setEditFormData}
                         onSave={handleSaveBillEdit}
@@ -374,7 +416,7 @@ const RentHistoryPage = () => {
                         <BillDetailView bill={billDetail.data.bill} />
                         {/* Action Buttons */}
                         <div className="mt-8 pt-6 border-t border-gray-200 flex gap-3 justify-end">
-                          <Button 
+                          <Button
                             onClick={() => setIsDeleteConfirming(true)}
                             variant="danger"
                             size="md"
@@ -382,7 +424,7 @@ const RentHistoryPage = () => {
                           >
                             🗑️ Delete Bill
                           </Button>
-                          <Button 
+                          <Button
                             onClick={handleEditBill}
                             variant="secondary"
                             size="md"
@@ -390,11 +432,14 @@ const RentHistoryPage = () => {
                           >
                             ✏️ Edit Bill
                           </Button>
-                          <Button 
+                          <Button
                             onClick={() => setIsSendConfirming(true)}
                             variant="primary"
                             size="md"
-                            disabled={actionLoading || billDetail?.data?.bill?.status === 'sent'}
+                            disabled={
+                              actionLoading ||
+                              billDetail?.data?.bill?.status === "sent"
+                            }
                           >
                             📤 Send to Tenant
                           </Button>
@@ -425,7 +470,9 @@ const RentHistoryPage = () => {
                         )}
                       </>
                     ) : (
-                      <div className="text-center py-8 text-gray-500">No details found.</div>
+                      <div className="text-center py-8 text-gray-500">
+                        No details found.
+                      </div>
                     )}
                   </div>
                 </div>
@@ -433,17 +480,19 @@ const RentHistoryPage = () => {
             </div>
           </div>
         )}
-        </div>
       </div>
-    );
-  };
+    </div>
+  );
+};
 
 // Bill Detail View Component
 function BillDetailView({ bill }) {
   console.log("bill:", bill);
   const month = bill.billingPeriod?.month || bill.month;
   const year = bill.billingPeriod?.year || bill.year;
-  const dueDate = bill.dueDate ? new Date(bill.dueDate).toLocaleDateString() : '-';
+  const dueDate = bill.dueDate
+    ? new Date(bill.dueDate).toLocaleDateString()
+    : "-";
   const totalAmount = bill.totalBill || bill.total || bill.amount || 0;
   const status = bill.status || "PENDING";
 
@@ -464,10 +513,16 @@ function BillDetailView({ bill }) {
     <div>
       <div className="flex justify-between items-start mb-6">
         <div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-1">Bill Details</h2>
-          <p className="text-sm text-gray-500">Invoice #{bill._id?.slice(-8)}</p>
+          <h2 className="text-3xl font-bold text-gray-900 mb-1">
+            Bill Details
+          </h2>
+          <p className="text-sm text-gray-500">
+            Invoice #{bill._id?.slice(-8)}
+          </p>
         </div>
-        <span className={`px-4 py-2 rounded-full text-sm font-semibold ${getStatusBadgeColor(status)}`}>
+        <span
+          className={`px-4 py-2 rounded-full text-sm font-semibold ${getStatusBadgeColor(status)}`}
+        >
           {status}
         </span>
       </div>
@@ -476,7 +531,9 @@ function BillDetailView({ bill }) {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <p className="text-sm text-gray-600 mb-1">Billing Period</p>
-            <p className="text-2xl font-bold text-gray-900">{month ? `${month}/${year}` : 'N/A'}</p>
+            <p className="text-2xl font-bold text-gray-900">
+              {month ? `${month}/${year}` : "N/A"}
+            </p>
           </div>
           <div>
             <p className="text-sm text-gray-600 mb-1">Due Date</p>
@@ -491,36 +548,56 @@ function BillDetailView({ bill }) {
       </div>
 
       <div className="mb-6">
-        <h3 className="text-lg font-bold text-gray-900 mb-4">Charges Breakdown</h3>
+        <h3 className="text-lg font-bold text-gray-900 mb-4">
+          Charges Breakdown
+        </h3>
         <div className="space-y-3">
           {bill.charges?.rent && (
             <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
               <span className="text-gray-700 font-medium">Rent</span>
-              <span className="text-gray-900 font-bold">₹{bill.charges.rent}</span>
+              <span className="text-gray-900 font-bold">
+                ₹{bill.charges.rent}
+              </span>
             </div>
           )}
           {bill.charges?.utilities?.water > 0 && (
             <div className="flex justify-between items-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
-              <span className="text-gray-700 font-medium">💧 Water Charges</span>
-              <span className="text-gray-900 font-bold">₹{bill.charges.utilities.water}</span>
+              <span className="text-gray-700 font-medium">
+                💧 Water Charges
+              </span>
+              <span className="text-gray-900 font-bold">
+                ₹{bill.charges.utilities.water}
+              </span>
             </div>
           )}
           {bill.charges?.utilities?.electricity > 0 && (
             <div className="flex justify-between items-center p-4 bg-yellow-50 rounded-lg hover:bg-yellow-100 transition-colors">
-              <span className="text-gray-700 font-medium">⚡ Electricity Charges</span>
-              <span className="text-gray-900 font-bold">₹{bill.charges.utilities.electricity}</span>
+              <span className="text-gray-700 font-medium">
+                ⚡ Electricity Charges
+              </span>
+              <span className="text-gray-900 font-bold">
+                ₹{bill.charges.utilities.electricity}
+              </span>
             </div>
           )}
           {bill.charges?.utilities?.trash > 0 && (
             <div className="flex justify-between items-center p-4 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors">
-              <span className="text-gray-700 font-medium">🗑️ Garbage Charges</span>
-              <span className="text-gray-900 font-bold">₹{bill.charges.utilities.trash}</span>
+              <span className="text-gray-700 font-medium">
+                🗑️ Garbage Charges
+              </span>
+              <span className="text-gray-900 font-bold">
+                ₹{bill.charges.utilities.trash}
+              </span>
             </div>
           )}
           {bill.charges?.maintenance > 0 && (
             <div className="flex justify-between items-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors">
-              <span className="text-gray-700 font-medium">🔧 Maintenance Charges</span>
-              <span className="text-gray-900 font-bold">₹{bill.charges.maintenance}</span>
+              <span className="text-gray-700 font-medium">
+                🔧 Maintenance Charges
+              </span>
+              <span className="text-gray-900 font-bold">
+                ₹{bill.charges.maintenance}
+              </span>
             </div>
           )}
         </div>
@@ -548,13 +625,23 @@ const TenantCard = ({ tenant, onSelect, onAddBill }) => (
         </div>
         <div className="flex-1">
           <h3 className="font-bold text-gray-900 text-lg">
-            {tenant.user?.firstName || 'Tenant'} {tenant.user?.lastName || ''}
+            {tenant.user?.firstName || "Tenant"} {tenant.user?.lastName || ""}
           </h3>
-          <p className="text-sm text-gray-500">{tenant.user?.email || '-'}</p>
+          <p className="text-sm text-gray-500">{tenant.user?.email || "-"}</p>
         </div>
         <div className="text-blue-500 group-hover:text-blue-700 transition-colors">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 5l7 7-7 7"
+            />
           </svg>
         </div>
       </div>
@@ -563,15 +650,21 @@ const TenantCard = ({ tenant, onSelect, onAddBill }) => (
     <div className="p-6 space-y-3">
       <div className="flex justify-between items-center pb-3 border-b border-gray-100">
         <span className="text-sm text-gray-600">Room</span>
-        <span className="font-bold text-gray-900 text-lg">{tenant.user?.unit || tenant.unit || '-'}</span>
+        <span className="font-bold text-gray-900 text-lg">
+          {tenant.user?.unit || tenant.unit || "-"}
+        </span>
       </div>
       <div className="flex justify-between items-center pb-3 border-b border-gray-100">
         <span className="text-sm text-gray-600">Monthly Rent</span>
-        <span className="font-bold text-gray-900 text-lg">₹{tenant.leaseDetails?.monthlyRent || 0}</span>
+        <span className="font-bold text-gray-900 text-lg">
+          ₹{tenant.leaseDetails?.monthlyRent || 0}
+        </span>
       </div>
       <div className="flex justify-between items-center">
         <span className="text-sm text-gray-600">Members</span>
-        <span className="font-bold text-gray-900 text-lg">{tenant.occupants?.length || 1}</span>
+        <span className="font-bold text-gray-900 text-lg">
+          {tenant.occupants?.length || 1}
+        </span>
       </div>
       {/* {tenant.balance && tenant.balance !== "0" && (
         <div className="flex justify-between items-center pt-3 border-t border-gray-100">
@@ -604,25 +697,42 @@ const TenantCard = ({ tenant, onSelect, onAddBill }) => (
   </div>
 );
 
-
 // Bill Card Component
 const BillCard = ({ bill, onClick }) => {
   const getStatusColor = (status) => {
     switch (status?.toUpperCase()) {
       case "PAID":
-        return { bg: "bg-green-50", border: "border-green-200", badge: "bg-green-100 text-green-800" };
+        return {
+          bg: "bg-green-50",
+          border: "border-green-200",
+          badge: "bg-green-100 text-green-800",
+        };
       case "PENDING":
-        return { bg: "bg-yellow-50", border: "border-yellow-200", badge: "bg-yellow-100 text-yellow-800" };
+        return {
+          bg: "bg-yellow-50",
+          border: "border-yellow-200",
+          badge: "bg-yellow-100 text-yellow-800",
+        };
       case "OVERDUE":
-        return { bg: "bg-red-50", border: "border-red-200", badge: "bg-red-100 text-red-800" };
+        return {
+          bg: "bg-red-50",
+          border: "border-red-200",
+          badge: "bg-red-100 text-red-800",
+        };
       default:
-        return { bg: "bg-gray-50", border: "border-gray-200", badge: "bg-gray-100 text-gray-800" };
+        return {
+          bg: "bg-gray-50",
+          border: "border-gray-200",
+          badge: "bg-gray-100 text-gray-800",
+        };
     }
   };
 
   const month = bill.billingPeriod?.month || bill.month;
   const year = bill.billingPeriod?.year || bill.year;
-  const dueDate = bill.dueDate ? new Date(bill.dueDate).toLocaleDateString() : "-";
+  const dueDate = bill.dueDate
+    ? new Date(bill.dueDate).toLocaleDateString()
+    : "-";
   const total = bill.totalAmount || bill.total || bill.amount || 0;
   const status = bill.status || "PENDING";
   const colors = getStatusColor(status);
@@ -639,7 +749,9 @@ const BillCard = ({ bill, onClick }) => {
             {month ? `${month}/${year}` : "Bill"}
           </h3>
         </div>
-        <span className={`px-4 py-2 rounded-full text-xs font-bold ${colors.badge} transition-transform group-hover:scale-110`}>
+        <span
+          className={`px-4 py-2 rounded-full text-xs font-bold ${colors.badge} transition-transform group-hover:scale-110`}
+        >
           {status}
         </span>
       </div>
@@ -656,7 +768,9 @@ const BillCard = ({ bill, onClick }) => {
 
       {(bill.charges?.rent || bill.charges?.utilities) && (
         <div className="bg-white bg-opacity-50 rounded-lg p-3 mb-4">
-          <p className="text-xs font-semibold text-gray-600 mb-2 uppercase">Charges</p>
+          <p className="text-xs font-semibold text-gray-600 mb-2 uppercase">
+            Charges
+          </p>
           <div className="space-y-1 text-sm">
             {bill.charges?.rent && (
               <div className="flex justify-between text-gray-700">
@@ -667,25 +781,33 @@ const BillCard = ({ bill, onClick }) => {
             {bill.charges?.utilities?.water > 0 && (
               <div className="flex justify-between text-gray-700">
                 <span>💧 Water</span>
-                <span className="font-semibold">₹{bill.charges.utilities.water}</span>
+                <span className="font-semibold">
+                  ₹{bill.charges.utilities.water}
+                </span>
               </div>
             )}
             {bill.charges?.utilities?.electricity > 0 && (
               <div className="flex justify-between text-gray-700">
                 <span>⚡ Power</span>
-                <span className="font-semibold">₹{bill.charges.utilities.electricity}</span>
+                <span className="font-semibold">
+                  ₹{bill.charges.utilities.electricity}
+                </span>
               </div>
             )}
             {bill.charges?.utilities?.trash > 0 && (
               <div className="flex justify-between text-gray-700">
                 <span>🗑️ Garbage</span>
-                <span className="font-semibold">₹{bill.charges.utilities.trash}</span>
+                <span className="font-semibold">
+                  ₹{bill.charges.utilities.trash}
+                </span>
               </div>
             )}
             {bill.charges?.maintenance > 0 && (
               <div className="flex justify-between text-gray-700">
                 <span>🔧 Maintenance</span>
-                <span className="font-semibold">₹{bill.charges.maintenance}</span>
+                <span className="font-semibold">
+                  ₹{bill.charges.maintenance}
+                </span>
               </div>
             )}
           </div>
@@ -702,14 +824,21 @@ const BillCard = ({ bill, onClick }) => {
 };
 
 // Bill Edit Form Component
-function BillEditForm({ bill, formData, setFormData, onSave, onCancel, loading }) {
+function BillEditForm({
+  bill,
+  formData,
+  setFormData,
+  onSave,
+  onCancel,
+  loading,
+}) {
   const handleChargeChange = (chargeType, value) => {
     setFormData({
       ...formData,
       charges: {
         ...formData.charges,
         [chargeType]: parseFloat(value),
-      }
+      },
     });
   };
 
@@ -721,74 +850,112 @@ function BillEditForm({ bill, formData, setFormData, onSave, onCancel, loading }
         utilities: {
           ...(formData.charges?.utilities ?? {}),
           [utilityType]: parseFloat(value),
-        }
-      }
+        },
+      },
     });
   };
 
   return (
     <div>
       <h2 className="text-3xl font-bold text-gray-900 mb-6">Edit Bill</h2>
-      
+
       <div className="space-y-6">
+        {/* Status */}
+        <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border border-green-100">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            Bill Status
+          </h3>
+          <select
+            value={formData.status || "PENDING"}
+            onChange={(e) =>
+              setFormData({ ...formData, status: e.target.value })
+            }
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+          >
+            <option value="partial">Partial</option>
+            <option value="paid">Paid</option>
+            {/* <option value="OVERDUE">Overdue</option> */}
+          </select>
+        </div>
+
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Charges</h3>
-          
+
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Rent</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Rent
+              </label>
               <input
                 type="number"
                 value={formData.charges?.rent ?? 0}
-                onChange={(e) => handleChargeChange('rent', e.target.value)}
+                onChange={(e) => handleChargeChange("rent", e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Enter rent amount"
               />
             </div>
 
             <div className="border-t border-blue-200 pt-4">
-              <h4 className="text-sm font-semibold text-gray-700 mb-3">Utilities</h4>
-              
+              <h4 className="text-sm font-semibold text-gray-700 mb-3">
+                Utilities
+              </h4>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">💧 Water</label>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                    💧 Water
+                  </label>
                   <input
                     type="number"
                     value={formData.charges?.utilities?.water ?? 0}
-                    onChange={(e) => handleUtilityChange('water', e.target.value)}
+                    onChange={(e) =>
+                      handleUtilityChange("water", e.target.value)
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                     placeholder="0"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">⚡ Electricity</label>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                    ⚡ Electricity
+                  </label>
                   <input
                     type="number"
                     value={formData.charges?.utilities?.electricity ?? 0}
-                    onChange={(e) => handleUtilityChange('electricity', e.target.value)}
+                    onChange={(e) =>
+                      handleUtilityChange("electricity", e.target.value)
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                     placeholder="0"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">🗑️ Garbage</label>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                    🗑️ Garbage
+                  </label>
                   <input
                     type="number"
                     value={formData.charges?.utilities?.trash ?? 0}
-                    onChange={(e) => handleUtilityChange('trash', e.target.value)}
+                    onChange={(e) =>
+                      handleUtilityChange("trash", e.target.value)
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                     placeholder="0"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">🔧 Maintenance</label>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                    🔧 Maintenance
+                  </label>
                   <input
                     type="number"
                     value={formData.charges?.maintenance ?? 0}
-                    onChange={(e) => handleChargeChange('maintenance', e.target.value)}
+                    onChange={(e) =>
+                      handleChargeChange("maintenance", e.target.value)
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                     placeholder="0"
                   />
@@ -800,7 +967,7 @@ function BillEditForm({ bill, formData, setFormData, onSave, onCancel, loading }
 
         {/* Action Buttons */}
         <div className="flex gap-3 justify-end pt-4 border-t border-gray-200">
-          <Button 
+          <Button
             onClick={onCancel}
             variant="outline"
             size="md"
@@ -808,7 +975,7 @@ function BillEditForm({ bill, formData, setFormData, onSave, onCancel, loading }
           >
             Cancel
           </Button>
-          <Button 
+          <Button
             onClick={onSave}
             variant="primary"
             size="md"
@@ -823,28 +990,37 @@ function BillEditForm({ bill, formData, setFormData, onSave, onCancel, loading }
 }
 
 // Confirm Dialog Component
-function ConfirmDialog({ title, message, onConfirm, onCancel, loading, variant = 'danger' }) {
+function ConfirmDialog({
+  title,
+  message,
+  onConfirm,
+  onCancel,
+  loading,
+  variant = "danger",
+}) {
   const getBgColor = () => {
     switch (variant) {
-      case 'danger':
-        return 'bg-red-50 border-red-200';
-      case 'primary':
-        return 'bg-blue-50 border-blue-200';
+      case "danger":
+        return "bg-red-50 border-red-200";
+      case "primary":
+        return "bg-blue-50 border-blue-200";
       default:
-        return 'bg-gray-50 border-gray-200';
+        return "bg-gray-50 border-gray-200";
     }
   };
 
-  const getButtonVariant = () => variant === 'danger' ? 'danger' : 'primary';
+  const getButtonVariant = () => (variant === "danger" ? "danger" : "primary");
 
   return (
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-4 z-50">
-      <div className={`bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full border ${getBgColor()}`}>
+      <div
+        className={`bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full border ${getBgColor()}`}
+      >
         <h3 className="text-lg font-bold text-gray-900 mb-2">{title}</h3>
         <p className="text-gray-600 text-sm mb-6">{message}</p>
 
         <div className="flex gap-3 justify-end">
-          <Button 
+          <Button
             onClick={onCancel}
             variant="outline"
             size="md"
@@ -852,7 +1028,7 @@ function ConfirmDialog({ title, message, onConfirm, onCancel, loading, variant =
           >
             Cancel
           </Button>
-          <Button 
+          <Button
             onClick={onConfirm}
             variant={getButtonVariant()}
             size="md"

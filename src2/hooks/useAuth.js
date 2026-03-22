@@ -1,256 +1,268 @@
-import { useSelector, useDispatch } from 'react-redux'
-import { useCallback, useRef, useEffect } from 'react'
-import { authService } from '../services/authService'
+/**
+ * useAuth Hook — Central authentication orchestrator
+ *
+ * Manages both traditional email/password and OAuth 2.0 + OIDC flows.
+ *
+ * Key differences from typical implementations:
+ * 1. Tokens are NEVER stored in localStorage (in-memory only via tokenManager)
+ * 2. On page refresh, silent re-authentication happens via httpOnly cookie
+ * 3. OAuth flow is initiated here, callback is handled by OAuthCallbackPage
+ * 4. All token management is delegated to tokenManager.js
+ */
+
+import { useSelector, useDispatch } from "react-redux";
+import { useCallback, useRef } from "react";
+import { authService } from "../services/authService";
+import { setAccessToken, clearTokens } from "../services/tokenManager.js";
 import {
   setLoading,
   setUser,
   clearUser,
   setError,
   setUserType,
+  setAuthProvider,
+  setLinkedProviders,
   selectUser,
   selectUserType,
   selectIsAuthenticated,
   selectAuthLoading,
-} from '../store/slices/authSlice'
-import { clearUserData } from '../store/slices/userSlice'
-import toast from 'react-hot-toast'
+  selectAuthProvider,
+  selectLinkedProviders,
+} from "../store/slices/authSlice";
+import { clearUserData } from "../store/slices/userSlice";
+import toast from "react-hot-toast";
 
 export const useAuth = () => {
-  const dispatch = useDispatch()
-  const user = useSelector(selectUser)
-  const userType = useSelector(selectUserType)
-  const isAuthenticated = useSelector(selectIsAuthenticated)
-  const isLoading = useSelector(selectAuthLoading)
-  const initializationRef = useRef(false)
-  const userTypeRef = useRef(userType)
+  const dispatch = useDispatch();
+  const user = useSelector(selectUser);
+  const userType = useSelector(selectUserType);
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const isLoading = useSelector(selectAuthLoading);
+  const authProvider = useSelector(selectAuthProvider);
+  const linkedProviders = useSelector(selectLinkedProviders);
+  const initializationRef = useRef(false);
 
-  // Update the ref when userType changes
-  useEffect(() => {
-    userTypeRef.current = userType
-  }, [userType])
-
+  /**
+   * Initialize auth state on app load.
+   * Attempts to restore the session via:
+   * 1. httpOnly refresh token cookie → silent refresh → access token in memory
+   * 2. Falls back to /auth/profile to check if the cookie session is valid
+   *
+   * This is called by AppLayout on mount.
+   */
   const initializeAuth = useCallback(async () => {
-    // Prevent multiple simultaneous initialization attempts
-    if (initializationRef.current || isAuthenticated || isLoading) {
+    // Only run once per app mount — ref never resets
+    if (initializationRef.current) {
       return;
     }
 
-    // Don't initialize on login/register pages - exit without any Redux dispatches
     const currentPath = window.location.pathname;
-    if (currentPath.includes('/login') || currentPath.includes('/register')) {
-      console.log('Auth: Skipping initialization on auth pages to prevent remounting')
+    if (
+      currentPath.includes("/login") ||
+      currentPath.includes("/register") ||
+      currentPath.includes("/auth/callback")
+    ) {
       return;
     }
+
+    initializationRef.current = true;
 
     try {
-      initializationRef.current = true;
-      dispatch(setLoading(true))
-      
-      // Add timeout to prevent hanging
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Request timeout')), 10000)
-      )
-      
+      dispatch(setLoading(true));
+
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Request timeout")), 10000),
+      );
+
       const userData = await Promise.race([
         authService.getCurrentUser(),
-        timeoutPromise
-      ])
-      
-      // Handle new unified User model response structure
-      const user = userData.data?.user || userData.user || userData.data || userData
-      
-      // Validate user data matches new User model structure
-      if (user && user.email && user.role && (user.id || user._id)) {
-        dispatch(setUser(user))
-        
-        // Set user type from the response role (owner/tenant/admin)
-        dispatch(setUserType(user.role))
-        
-        console.log('Auth initialization successful for user:', user.email, 'role:', user.role)
-      } else {
-        console.log('No valid user data found or invalid format, clearing auth state')
-        dispatch(clearUser())
-      }
-    } catch (authError) {
-      // User not authenticated or error occurred
-      console.log('Auth initialization failed:', authError.message)
-      dispatch(clearUser())
-    } finally {
-      dispatch(setLoading(false))
-      // Reset the ref after a delay to allow for future attempts if needed
-      setTimeout(() => {
-        initializationRef.current = false;
-      }, 1000);
-    }
-  }, [dispatch, isAuthenticated, isLoading])
+        timeoutPromise,
+      ]);
 
-  const login = useCallback(async (loginData) => {
-    try {
-      dispatch(setLoading(true))
-      
-      // Add role to login data for unified API
-      const requestData = {
-        ...loginData,
-        role: userType
-      }
-      
-      console.log('useAuth: Attempting login with:', requestData)
-      
-      const response = await authService.login(requestData)
-      
-      console.log('Login response:', response)
-      
-      // Handle backend controller response: { success: true, data: { user: {...}, token: "..." }, message: "..." }
-      if (response.success && response.data) {
-        const userData = response.data.user
-        const token = response.data.token
-        
-        console.log('Extracted user data:', userData)
-        console.log('Token received:', !!token)
-        
-        // Validate user data has required fields from User model
-        if (userData && userData.email && userData.role) {
-          dispatch(setUser(userData))
-          console.log('Dispatched setUser with:', userData)
-          
-          // Set user type from the response role (owner/tenant/admin)
-          dispatch(setUserType(userData.role))
-          console.log('Set user type to:', userData.role)
-          
-          // Store token if needed (for future API calls)
-          if (token) {
-            localStorage.setItem('auth_token', token)
-          }
-          
-          toast.success('Login successful!')
-          return { success: true, data: userData }
-        } else {
-          console.error('Invalid user data received:', userData)
-          throw new Error('Invalid user data received from server')
+      const resolvedUser =
+        userData.data?.user || userData.user || userData.data || userData;
+
+      if (
+        resolvedUser &&
+        resolvedUser.email &&
+        resolvedUser.role &&
+        (resolvedUser.id || resolvedUser._id)
+      ) {
+        dispatch(setUser(resolvedUser));
+        dispatch(setUserType(resolvedUser.role));
+
+        // If the response includes token info, store it in memory
+        if (userData.data?.token) {
+          setAccessToken(userData.data.token, userData.data.expiresIn || 900);
+        }
+
+        // Track linked OAuth providers if returned
+        if (resolvedUser.linkedProviders) {
+          dispatch(setLinkedProviders(resolvedUser.linkedProviders));
+        }
+        if (resolvedUser.authProvider) {
+          dispatch(setAuthProvider(resolvedUser.authProvider));
         }
       } else {
-        console.error('Login failed - invalid response structure:', response)
-        throw new Error(response.message || 'Login failed')
+        dispatch(clearUser());
       }
-    } catch (error) {
-      dispatch(setError(error.message))
-      toast.error(error.message)
-      return { success: false, error: error.message }
+    } catch {
+      dispatch(clearUser());
     } finally {
-      dispatch(setLoading(false))
+      dispatch(setLoading(false));
     }
-  }, [dispatch, userType])
+  }, [dispatch]);
 
-  const register = useCallback(async (userData) => {
-    try {
-      dispatch(setLoading(true))
-      
-      // Add role to userData for unified API
-      const registerData = {
-        ...userData,
-        role: userType
-      }
-      
-      const response = await authService.register(registerData)
-      
-      console.log('Registration response:', response)
-      
-      // Handle backend controller response: { success: true, data: { user: {...}, token: "..." }, message: "..." }
-      if (response.success && response.data) {
-        const user = response.data.user
-        const token = response.data.token
-        
-        console.log('Extracted user data:', user)
-        
-        // Validate user data has required fields from User model
-        if (user && user.email && user.role) {
-          dispatch(setUser(user))
-          dispatch(setUserType(user.role))
-          
-          // Store token if needed
-          if (token) {
-            localStorage.setItem('auth_token', token)
+  /**
+   * Email/password login.
+   * Token is stored in memory by authService.processAuthResponse().
+   */
+  const login = useCallback(
+    async (loginData) => {
+      try {
+        dispatch(setLoading(true));
+
+        const requestData = {
+          ...loginData,
+          role: userType,
+        };
+
+        const response = await authService.login(requestData);
+
+        if (response.success && response.data) {
+          const userData = response.data.user;
+
+          if (userData && userData.email && userData.role) {
+            dispatch(setUser(userData));
+            dispatch(setUserType(userData.role));
+            dispatch(setAuthProvider(null)); // Email/password login
+
+            toast.success("Login successful!");
+            return { success: true, data: userData };
+          } else {
+            throw new Error("Invalid user data received from server");
           }
         } else {
-          console.error('Invalid user data in registration response:', user)
-          throw new Error('Invalid user data received from server')
+          throw new Error(response.message || "Login failed");
         }
-      } else {
-        console.error('Registration failed - invalid response structure:', response)
-        throw new Error(response.message || 'Registration failed')
+      } catch (error) {
+        dispatch(setError(error.message));
+        toast.error(error.message);
+        return { success: false, error: error.message };
+      } finally {
+        dispatch(setLoading(false));
       }
-      
-      toast.success('Registration successful!')
-      return { success: true, data: user }
-    } catch (error) {
-      dispatch(setError(error.message))
-      toast.error(error.message)
-      return { success: false, error: error.message }
-    } finally {
-      dispatch(setLoading(false))
-    }
-  }, [dispatch, userType])
+    },
+    [dispatch, userType],
+  );
 
+  /**
+   * Email/password registration.
+   */
+  const register = useCallback(
+    async (userData) => {
+      try {
+        dispatch(setLoading(true));
+
+        const registerData = {
+          ...userData,
+          role: userType,
+        };
+
+        const response = await authService.register(registerData);
+
+        if (response.success && response.data) {
+          const newUser = response.data.user;
+
+          if (newUser && newUser.email && newUser.role) {
+            dispatch(setUser(newUser));
+            dispatch(setUserType(newUser.role));
+            dispatch(setAuthProvider(null));
+
+            toast.success("Registration successful!");
+            return { success: true, data: newUser };
+          } else {
+            throw new Error("Invalid user data received from server");
+          }
+        } else {
+          throw new Error(response.message || "Registration failed");
+        }
+      } catch (error) {
+        dispatch(setError(error.message));
+        toast.error(error.message);
+        return { success: false, error: error.message };
+      } finally {
+        dispatch(setLoading(false));
+      }
+    },
+    [dispatch, userType],
+  );
+
+  /**
+   * Logout — clears tokens (in-memory + httpOnly cookie via backend) and Redux state.
+   */
   const logout = useCallback(async () => {
     try {
-      await authService.logout()
-      dispatch(clearUser())
-      dispatch(clearUserData())
-      toast.success('Logged out successfully')
-    } catch (error) {
-      // Still clear local state even if API call fails
-      dispatch(clearUser())
-      dispatch(clearUserData())
-      toast.error('Logout failed, but you have been logged out locally')
+      await authService.logout();
+      dispatch(clearUser());
+      dispatch(clearUserData());
+      clearTokens();
+      toast.success("Logged out successfully");
+    } catch {
+      // Always clear local state even if server logout fails
+      dispatch(clearUser());
+      dispatch(clearUserData());
+      clearTokens();
+      toast.error("Logout failed, but you have been logged out locally");
     }
-  }, [dispatch])
+  }, [dispatch]);
 
-  const updateProfile = useCallback(async (profileData) => {
-    try {
-      dispatch(setLoading(true))
-      const response = await authService.updateProfile(profileData)
-      
-      console.log('Profile update response:', response)
-      
-      // Handle backend controller response: { success: true, data: { user: {...} }, message: "..." }
-      if (response.success && response.data) {
-        const updatedUser = response.data.user
-        
-        console.log('Extracted updated user data:', updatedUser)
-        
-        // Validate updated user data
-        if (updatedUser && updatedUser.email && updatedUser.role) {
-          dispatch(setUser(updatedUser))
-          dispatch(setUserType(updatedUser.role))
-          
-          toast.success('Profile updated successfully!')
-          return { success: true, data: updatedUser }
+  /**
+   * Update user profile.
+   */
+  const updateProfile = useCallback(
+    async (profileData) => {
+      try {
+        dispatch(setLoading(true));
+        const response = await authService.updateProfile(profileData);
+
+        if (response.success && response.data) {
+          const updatedUser = response.data.user;
+
+          if (updatedUser && updatedUser.email && updatedUser.role) {
+            dispatch(setUser(updatedUser));
+            dispatch(setUserType(updatedUser.role));
+
+            toast.success("Profile updated successfully!");
+            return { success: true, data: updatedUser };
+          } else {
+            throw new Error("Invalid user data received from server");
+          }
         } else {
-          console.error('Invalid updated user data in response:', updatedUser)
-          throw new Error('Invalid user data received from server')
+          throw new Error(response.message || "Profile update failed");
         }
-      } else {
-        console.error('Profile update failed - invalid response structure:', response)
-        throw new Error(response.message || 'Profile update failed')
+      } catch (error) {
+        dispatch(setError(error.message));
+        toast.error(error.message);
+        return { success: false, error: error.message };
+      } finally {
+        dispatch(setLoading(false));
       }
-    } catch (error) {
-      dispatch(setError(error.message))
-      toast.error(error.message)
-      return { success: false, error: error.message }
-    } finally {
-      dispatch(setLoading(false))
-    }
-  }, [dispatch])
+    },
+    [dispatch],
+  );
 
   return {
     user,
     userType,
     isAuthenticated,
     isLoading,
+    authProvider,
+    linkedProviders,
     initializeAuth,
     login,
     register,
     logout,
     updateProfile,
-  }
-}
+  };
+};

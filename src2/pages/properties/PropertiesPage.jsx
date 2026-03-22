@@ -1,155 +1,164 @@
-import { useEffect, useState } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
-import { selectUserType } from '../../store/slices/authSlice'
-import { 
-  selectProperties, 
-  selectPropertyLoading, 
+import { useEffect, useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { selectUserType } from "../../store/slices/authSlice";
+import {
+  selectProperties,
+  selectPropertyLoading,
   selectPropertyError,
   setLoading,
   setProperties,
   setError,
-  deleteProperty
-} from '../../store/slices/propertySlice'
-import { propertyService } from '../../services/propertyService'
-import { Button } from '../../components/ui/Button'
-import { LoadingSpinner } from '../../components/ui/LoadingSpinner'
-import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
-import { USER_TYPES, ROUTES } from '../../config/constants'
-import toast from 'react-hot-toast'
+  deleteProperty,
+} from "../../store/slices/propertySlice";
+import { propertyService } from "../../services/propertyService";
+import { Button } from "../../components/ui/Button";
+import { LoadingSpinner } from "../../components/ui/LoadingSpinner";
+import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
+import { USER_TYPES, ROUTES } from "../../config/constants";
+import toast from "react-hot-toast";
 
 const PropertiesPage = () => {
-  const dispatch = useDispatch()
-  const navigate = useNavigate()
-  const userType = useSelector(selectUserType)
-  const properties = useSelector(selectProperties)
-  const loading = useSelector(selectPropertyLoading)
-  const error = useSelector(selectPropertyError)
-  const isOwner = userType === USER_TYPES.OWNER
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const userType = useSelector(selectUserType);
+  const properties = useSelector(selectProperties);
+  const loading = useSelector(selectPropertyLoading);
+  const error = useSelector(selectPropertyError);
+  const isOwner = userType === USER_TYPES.OWNER;
 
   const [deleteDialog, setDeleteDialog] = useState({
     isOpen: false,
     propertyId: null,
-    propertyName: '',
-    isDeleting: false
-  })
+    propertyName: "",
+    isDeleting: false,
+  });
 
   useEffect(() => {
-    if (isOwner) {
+    if (isOwner && !loading) {
       if (properties && properties.length > 0) {
-        return
+        return;
       }
-      loadProperties()
+      loadProperties();
     }
-  }, [isOwner]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isOwner]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!isOwner) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h1>
-          <p className="text-gray-600">This page is only available to property owners.</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">
+            Access Denied
+          </h1>
+          <p className="text-gray-600">
+            This page is only available to property owners.
+          </p>
         </div>
       </div>
-    )
+    );
   }
 
   const loadProperties = async () => {
     try {
-      dispatch(setLoading(true))
-      const response = await propertyService.getProperties()
-      const propertiesData = response.data?.properties || response.properties || response.data || []
-      dispatch(setProperties({ 
-        properties: propertiesData,
-        pagination: response.data?.pagination || response.pagination || null
-      }))
-      dispatch(setLoading(false))
-      toast.success(`Loaded ${propertiesData.length} properties`)
+      dispatch(setLoading(true));
+      const response = await propertyService.getProperties();
+      const propertiesData =
+        response.data?.properties || response.properties || response.data || [];
+      dispatch(
+        setProperties({
+          properties: propertiesData,
+          pagination: response.data?.pagination || response.pagination || null,
+        }),
+      );
+      dispatch(setLoading(false));
+      toast.success(`Loaded ${propertiesData.length} properties`);
     } catch (error) {
-      console.error('Load properties error:', error)
-      const errorMessage = error.response?.data?.message || 'Failed to load properties'
-      dispatch(setError(errorMessage))
-      toast.error(errorMessage)
+      console.error("Load properties error:", error);
+      const errorMessage =
+        error.response?.data?.message || "Failed to load properties";
+      dispatch(setError(errorMessage));
+      toast.error(errorMessage);
     }
-  }
+  };
 
   const handleAddProperty = () => {
-    navigate(ROUTES.ADD_PROPERTY)
-  }
+    navigate(ROUTES.ADD_PROPERTY);
+  };
 
   const handleEditProperty = (propertyId) => {
-    navigate(ROUTES.EDIT_PROPERTY(propertyId))
-  }
+    navigate(ROUTES.EDIT_PROPERTY(propertyId));
+  };
 
   const handleDeleteProperty = (property) => {
     setDeleteDialog({
       isOpen: true,
       propertyId: property._id,
       propertyName: property.name,
-      isDeleting: false
-    })
-  }
+      isDeleting: false,
+    });
+  };
 
   const confirmDelete = async () => {
     try {
-      setDeleteDialog(prev => ({ ...prev, isDeleting: true }))
-      
-      await propertyService.deleteProperty(deleteDialog.propertyId)
-      dispatch(deleteProperty(deleteDialog.propertyId))
-      
-      toast.success(`${deleteDialog.propertyName} has been deleted`)
-      
+      setDeleteDialog((prev) => ({ ...prev, isDeleting: true }));
+
+      await propertyService.deleteProperty(deleteDialog.propertyId);
+      dispatch(deleteProperty(deleteDialog.propertyId));
+
+      toast.success(`${deleteDialog.propertyName} has been deleted`);
+
       setDeleteDialog({
         isOpen: false,
         propertyId: null,
-        propertyName: '',
-        isDeleting: false
-      })
+        propertyName: "",
+        isDeleting: false,
+      });
     } catch (error) {
-      console.error('Delete property error:', error)
-      const errorMessage = error.response?.data?.message || 'Failed to delete property'
-      toast.error(errorMessage)
-      setDeleteDialog(prev => ({ ...prev, isDeleting: false }))
+      console.error("Delete property error:", error);
+      const errorMessage =
+        error.response?.data?.message || "Failed to delete property";
+      toast.error(errorMessage);
+      setDeleteDialog((prev) => ({ ...prev, isDeleting: false }));
     }
-  }
+  };
 
   const cancelDelete = () => {
     setDeleteDialog({
       isOpen: false,
       propertyId: null,
-      propertyName: '',
-      isDeleting: false
-    })
-  }
+      propertyName: "",
+      isDeleting: false,
+    });
+  };
 
   const getPropertyTypeLabel = (type) => {
     const types = {
-      apartment: 'Apartment',
-      house: 'House',
-      condo: 'Condo',
-      studio: 'Studio',
-      room: 'Room',
-      commercial: 'Commercial'
-    }
-    return types[type] || type
-  }
+      apartment: "Apartment",
+      house: "House",
+      condo: "Condo",
+      studio: "Studio",
+      room: "Room",
+      commercial: "Commercial",
+    };
+    return types[type] || type;
+  };
 
   const getPropertyTypeBadgeColor = (type) => {
     const colors = {
-      apartment: 'bg-blue-100 text-blue-800',
-      house: 'bg-green-100 text-green-800',
-      condo: 'bg-purple-100 text-purple-800',
-      studio: 'bg-yellow-100 text-yellow-800',
-      room: 'bg-pink-100 text-pink-800',
-      commercial: 'bg-gray-100 text-gray-800'
-    }
-    return colors[type] || 'bg-gray-100 text-gray-800'
-  }
+      apartment: "bg-blue-100 text-blue-800",
+      house: "bg-green-100 text-green-800",
+      condo: "bg-purple-100 text-purple-800",
+      studio: "bg-yellow-100 text-yellow-800",
+      room: "bg-pink-100 text-pink-800",
+      commercial: "bg-gray-100 text-gray-800",
+    };
+    return colors[type] || "bg-gray-100 text-gray-800";
+  };
 
   const calculateOccupancyRate = (totalUnits, availableUnits) => {
-    if (totalUnits === 0) return 0
-    return (((totalUnits - availableUnits) / totalUnits) * 100).toFixed(0)
-  }
+    if (totalUnits === 0) return 0;
+    return (((totalUnits - availableUnits) / totalUnits) * 100).toFixed(0);
+  };
 
   return (
     <div className="min-h-screen w-full bg-gray-50 py-8">
@@ -162,7 +171,10 @@ const PropertiesPage = () => {
               Manage your rental properties and track occupancy
             </p>
           </div>
-          <Button onClick={handleAddProperty} className="flex items-center gap-2">
+          <Button
+            onClick={handleAddProperty}
+            className="flex items-center gap-2"
+          >
             <span className="text-lg">+</span> Add Property
           </Button>
         </div>
@@ -178,7 +190,7 @@ const PropertiesPage = () => {
         {error && !loading && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
             <p className="text-red-800">{error}</p>
-            <button 
+            <button
               onClick={loadProperties}
               className="mt-2 text-red-600 hover:text-red-700 font-medium"
             >
@@ -196,9 +208,13 @@ const PropertiesPage = () => {
                 No Properties Yet
               </h3>
               <p className="text-gray-600 mb-6">
-                Get started by adding your first property to manage tenants and track rent
+                Get started by adding your first property to manage tenants and
+                track rent
               </p>
-              <Button onClick={handleAddProperty} className="inline-flex items-center gap-2">
+              <Button
+                onClick={handleAddProperty}
+                className="inline-flex items-center gap-2"
+              >
                 <span className="text-lg">+</span> Add Your First Property
               </Button>
             </div>
@@ -209,23 +225,27 @@ const PropertiesPage = () => {
         {!loading && properties.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {properties.map((property) => {
-              const occupancyRate = calculateOccupancyRate(property.totalUnits, property.availableUnits)
-              const occupiedUnits = property.totalUnits - property.availableUnits
+              const occupancyRate = calculateOccupancyRate(
+                property.totalUnits,
+                property.availableUnits,
+              );
+              const occupiedUnits =
+                property.totalUnits - property.availableUnits;
 
               return (
-                <div 
-                  key={property._id} 
+                <div
+                  key={property._id}
                   className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
                 >
                   {/* Property Image */}
                   <div className="h-48 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
                     <span className="text-white text-6xl">
-                      {property.propertyType === 'apartment' && '🏢'}
-                      {property.propertyType === 'house' && '🏠'}
-                      {property.propertyType === 'condo' && '🏘️'}
-                      {property.propertyType === 'studio' && '🏙️'}
-                      {property.propertyType === 'room' && '🚪'}
-                      {property.propertyType === 'commercial' && '🏬'}
+                      {property.propertyType === "apartment" && "🏢"}
+                      {property.propertyType === "house" && "🏠"}
+                      {property.propertyType === "condo" && "🏘️"}
+                      {property.propertyType === "studio" && "🏙️"}
+                      {property.propertyType === "room" && "🚪"}
+                      {property.propertyType === "commercial" && "🏬"}
                     </span>
                   </div>
 
@@ -235,7 +255,9 @@ const PropertiesPage = () => {
                       <h3 className="text-xl font-semibold text-gray-900 flex-1">
                         {property.name}
                       </h3>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPropertyTypeBadgeColor(property.propertyType)}`}>
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${getPropertyTypeBadgeColor(property.propertyType)}`}
+                      >
                         {getPropertyTypeLabel(property.propertyType)}
                       </span>
                     </div>
@@ -243,7 +265,9 @@ const PropertiesPage = () => {
                     <div className="text-sm text-gray-600 mb-4">
                       <p className="flex items-center gap-2">
                         <span>📍</span>
-                        <span>{property.address?.city}, {property.address?.state}</span>
+                        <span>
+                          {property.address?.city}, {property.address?.state}
+                        </span>
                       </p>
                       <p className="mt-1 text-xs text-gray-500">
                         {property.address?.street}
@@ -254,10 +278,12 @@ const PropertiesPage = () => {
                     <div className="bg-gray-50 rounded-lg p-3 mb-4">
                       <div className="flex justify-between items-center mb-2">
                         <span className="text-sm text-gray-600">Occupancy</span>
-                        <span className="text-sm font-semibold text-gray-900">{occupancyRate}%</span>
+                        <span className="text-sm font-semibold text-gray-900">
+                          {occupancyRate}%
+                        </span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
-                        <div 
+                        <div
                           className="bg-blue-600 h-2 rounded-full transition-all"
                           style={{ width: `${occupancyRate}%` }}
                         ></div>
@@ -273,14 +299,16 @@ const PropertiesPage = () => {
                     {property.amenities && property.amenities.length > 0 && (
                       <div className="mb-4">
                         <div className="flex flex-wrap gap-1">
-                          {property.amenities.slice(0, 3).map((amenity, index) => (
-                            <span 
-                              key={index}
-                              className="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs"
-                            >
-                              {amenity}
-                            </span>
-                          ))}
+                          {property.amenities
+                            .slice(0, 3)
+                            .map((amenity, index) => (
+                              <span
+                                key={index}
+                                className="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs"
+                              >
+                                {amenity}
+                              </span>
+                            ))}
                           {property.amenities.length > 3 && (
                             <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">
                               +{property.amenities.length - 3} more
@@ -307,7 +335,7 @@ const PropertiesPage = () => {
                     </div>
                   </div>
                 </div>
-              )
+              );
             })}
           </div>
         )}
@@ -317,7 +345,7 @@ const PropertiesPage = () => {
           isOpen={deleteDialog.isOpen}
           title="Delete Property"
           message={`Are you sure you want to delete "${deleteDialog.propertyName}"? This action cannot be undone.`}
-          confirmLabel={deleteDialog.isDeleting ? 'Deleting...' : 'Delete'}
+          confirmLabel={deleteDialog.isDeleting ? "Deleting..." : "Delete"}
           cancelLabel="Cancel"
           onConfirm={confirmDelete}
           onCancel={cancelDelete}
@@ -326,7 +354,7 @@ const PropertiesPage = () => {
         />
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default PropertiesPage
+export default PropertiesPage;

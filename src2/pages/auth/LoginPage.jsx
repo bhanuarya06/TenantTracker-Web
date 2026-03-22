@@ -9,6 +9,7 @@ import {
 import { useAuth } from "../../hooks/useAuth";
 import { Button } from "../../components/ui/Button";
 import { LoadingSpinner } from "../../components/ui/LoadingSpinner";
+import { SocialLoginButtons } from "../../components/auth/SocialLoginButtons";
 import { ROUTES, USER_TYPES, FORM_VALIDATION } from "../../config/constants";
 
 export const LoginPage = () => {
@@ -221,6 +222,9 @@ export const LoginPage = () => {
               {isLoading ? <LoadingSpinner size="sm" /> : "Sign in"}
             </Button>
           </div>
+
+          {/* OAuth Social Login Buttons */}
+          <SocialLoginButtons mode="login" />
 
           <div className="text-center">
             <span className="text-sm text-gray-600">
